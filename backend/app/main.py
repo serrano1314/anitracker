@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.anime import router as anime_router
 from app.api.auth import router as auth_router
+from app.api.library import router as library_router
 from app.core.config import get_settings
 from app.db.session import engine
 from app.schemas.health import HealthResponse
@@ -23,6 +24,7 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(anime_router, prefix="/api/v1")
+app.include_router(library_router, prefix="/api/v1")
 
 
 @app.get("/health", response_model=HealthResponse)

@@ -18,9 +18,13 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.models.anime import Anime as AnimeModel
+from app.models.library import EpisodeProgress as EpisodeProgressModel
+from app.models.library import UserAnime as UserAnimeModel
 from app.models.user import User as UserModel
 
 _ = AnimeModel
+_ = EpisodeProgressModel
+_ = UserAnimeModel
 _ = UserModel
 
 engine = create_engine(
