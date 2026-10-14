@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  33% { transform: translateY(-12px) translateX(8px); }
+  66% { transform: translateY(6px) translateX(-4px); }
+}
+
+@keyframes unlock-in {
+  0% { opacity: 0; transform: scale(0.92) translateY(20px); }
+  60% { opacity: 1; transform: scale(1.02) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
