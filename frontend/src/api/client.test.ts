@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ApiError, buildAuthHeaders, readApiError } from './client'
+import { ApiError, buildAuthHeaders, readApiError, readJson } from './client'
 
 describe('buildAuthHeaders', () => {
   it('sets JSON content type and omits Authorization when logged out', () => {
@@ -24,5 +24,20 @@ describe('readApiError', () => {
     expect(error).toBeInstanceOf(ApiError)
     expect(error.status).toBe(401)
     expect(error.message).toBe('Invalid email or password')
+  })
+})
+
+describe('readJson', () => {
+  it('returns the JSON body when the response is ok', async () => {
+    const response = new Response(JSON.stringify({ ok: true }), { status: 200 })
+    await expect(readJson<{ ok: boolean }>(response)).resolves.toEqual({ ok: true })
+  })
+
+  it('throws ApiError when the response failed', async () => {
+    const response = new Response(JSON.stringify({ detail: 'Nope' }), { status: 404 })
+    await expect(readJson(response)).rejects.toMatchObject({
+      status: 404,
+      message: 'Nope',
+    })
   })
 })

@@ -32,6 +32,13 @@ export function buildAuthHeaders(
   return headers
 }
 
+export async function readJson<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    throw await readApiError(response)
+  }
+  return (await response.json()) as T
+}
+
 export async function readApiError(response: Response): Promise<ApiError> {
   const data: unknown = await response.json().catch(() => null)
   let message = response.statusText || 'Request failed'
