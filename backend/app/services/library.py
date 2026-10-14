@@ -13,7 +13,8 @@ from app.schemas.library import (
     LibraryListResponse,
     LibraryStatus,
 )
-from app.services.anime import get_anime
+from app.services.anilist import AniListError
+from app.services.anime import AnimeSource, get_anime, is_still_airing
 
 LIBRARY_PAGE_SIZE = 24
 
@@ -24,6 +25,7 @@ def list_library(
     *,
     status_filter: LibraryStatus | None,
     page: int,
+    client: AnimeSource | None = None,
 ) -> LibraryListResponse:
     watched_counts = (
         select(
@@ -57,10 +59,19 @@ def list_library(
         page=page,
         has_next_page=has_next_page,
         results=[
-            entry_response(entry, anime, int(watched_count))
+            entry_response(entry, _refresh_if_airing(db, anime, client), int(watched_count))
             for entry, anime, watched_count in visible
         ],
     )
+
+
+def _refresh_if_airing(db: Session, anime: Anime, client: AnimeSource | None) -> Anime:
+    if not is_still_airing(anime.airing_status):
+        return anime
+    try:
+        return get_anime(db, anime.anilist_id, client=client)
+    except AniListError:
+        return anime
 
 
 def add_to_library(db: Session, user: User, anilist_id: int, list_status: LibraryStatus) -> LibraryEntryResponse:

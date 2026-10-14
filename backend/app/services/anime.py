@@ -64,7 +64,13 @@ def upsert_anime(db: Session, data: AnimeData, *, synced_at: datetime | None = N
     return row
 
 
+def is_still_airing(airing_status: str | None) -> bool:
+    return airing_status == "RELEASING"
+
+
 def _is_fresh(anime: Anime, now: datetime) -> bool:
+    if is_still_airing(anime.airing_status):
+        return False
     ttl = timedelta(hours=get_settings().ANIME_SYNC_TTL_HOURS)
     synced = anime.last_synced_at
     if synced.tzinfo is None:

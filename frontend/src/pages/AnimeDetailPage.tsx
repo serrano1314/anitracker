@@ -14,6 +14,7 @@ import {
 } from '../api/library'
 import { EpisodeGrid } from '../components/EpisodeGrid'
 import { ProgressMeter } from '../components/ProgressMeter'
+import { useDialog } from '../components/dialogContext'
 import { airingLabel, displayTitle, formatLabel } from '../lib/display'
 import { episodeCountLabel, knownTotal, parseEpisodeInput } from '../lib/episodes'
 import { STATUS_LABELS, type LibraryStatus } from '../types/library'
@@ -27,6 +28,7 @@ export function AnimeDetailPage() {
   const rawId = Number(params.anilistId)
   const anilistId = Number.isInteger(rawId) && rawId >= 1 ? rawId : null
   const queryClient = useQueryClient()
+  const dialog = useDialog()
   const [addStatus, setAddStatus] = useState<LibraryStatus>('watching')
   const [markInput, setMarkInput] = useState('')
   const [jumpInput, setJumpInput] = useState('')
@@ -136,7 +138,31 @@ export function AnimeDetailPage() {
   const maxEpisode = knownTotal(total) ?? 5000
   const pending =
     episodeMutation.isPending || markMutation.isPending || addMutation.isPending || removeMutation.isPending
-  const actionError = episodeMutation.error ?? markMutation.error ?? addMutation.error ?? updateMutation.error ?? removeMutation.error
+  const actionError = episodeMutation.error ?? markMutation.error ?? addMutation.error ?? updateMutation.error
+
+  async function onRemove() {
+    const confirmed = await dialog.confirm({
+      title: 'Remove from list',
+      message: `Remove ${title} from your list? Episode progress will be deleted.`,
+      confirmLabel: 'Remove',
+      tone: 'danger',
+    })
+    if (!confirmed) {
+      return
+    }
+    try {
+      await removeMutation.mutateAsync()
+      await dialog.success({
+        title: 'Removed',
+        message: `${title} was removed from your list.`,
+      })
+    } catch (error) {
+      await dialog.error({
+        title: 'Could not remove',
+        message: errorText(error, 'Could not remove this anime.'),
+      })
+    }
+  }
 
   function onMarkUpTo(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -309,18 +335,21 @@ export function AnimeDetailPage() {
               Jump
             </button>
           </form>
-          <button
-            type="button"
-            disabled={removeMutation.isPending}
-            onClick={() => {
-              if (window.confirm(`Remove ${title} from your list?`)) {
-                removeMutation.mutate()
-              }
-            }}
-            className="text-sm text-zinc-400 hover:text-red-400"
-          >
-            Remove from list
-          </button>
+          <div className="border-t border-zinc-800 pt-4">
+            <button
+              type="button"
+              disabled={removeMutation.isPending}
+              onClick={() => {
+                void onRemove()
+              }}
+              className="inline-flex items-center gap-2 rounded-md border border-red-500/60 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-60"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4 fill-current">
+                <path d="M7.5 2.5h5l.5 1.5H16a1 1 0 1 1 0 2h-.6l-.7 10.1A2 2 0 0 1 12.7 18H7.3a2 2 0 0 1-2-1.9L4.6 6H4a1 1 0 1 1 0-2h3zm-1 3.5.6 9.5h6.8l.6-9.5zM8.5 8a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1zm3 0a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1z" />
+              </svg>
+              {removeMutation.isPending ? 'Removing…' : 'Remove from list'}
+            </button>
+          </div>
         </div>
       ) : null}
 

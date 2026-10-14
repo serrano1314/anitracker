@@ -5,6 +5,7 @@ from app.services.anilist import (
     AniListNotFound,
     AniListRateLimited,
     AniListUnavailable,
+    episode_count,
     map_media,
 )
 
@@ -77,6 +78,37 @@ def test_map_media_keeps_our_fields_and_streaming_links_only() -> None:
     assert dumped["external_links"] == [
         {"site": "Crunchyroll", "url": "https://www.crunchyroll.com/one-piece"}
     ]
+
+
+def test_releasing_show_uses_episodes_aired_when_the_total_is_unknown() -> None:
+    media = _media()
+    media["nextAiringEpisode"] = {"episode": 1181}
+    assert episode_count(media, "RELEASING") == 1180
+    mapped = map_media(media)
+    assert mapped is not None
+    assert mapped.total_episodes == 1180
+
+
+def test_known_total_wins_over_the_next_airing_episode() -> None:
+    media = _media()
+    media["episodes"] = 12
+    media["nextAiringEpisode"] = {"episode": 5}
+    assert episode_count(media, "RELEASING") == 12
+
+
+def test_next_episode_one_stays_unknown() -> None:
+    media = _media()
+    media["nextAiringEpisode"] = {"episode": 1}
+    assert episode_count(media, "RELEASING") is None
+    media["nextAiringEpisode"] = {"episode": True}
+    assert episode_count(media, "RELEASING") is None
+
+
+def test_finished_show_does_not_guess_a_total_from_the_schedule() -> None:
+    media = _media()
+    media["status"] = "FINISHED"
+    media["nextAiringEpisode"] = {"episode": 1181}
+    assert episode_count(media, "FINISHED") is None
 
 
 def test_map_media_uses_english_when_romaji_is_missing() -> None:

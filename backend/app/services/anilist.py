@@ -26,6 +26,9 @@ _MEDIA_SELECTION = """
   format
   episodes
   status
+  nextAiringEpisode {
+    episode
+  }
   seasonYear
   externalLinks {
     site
@@ -124,6 +127,22 @@ def _as_str(value: object) -> str | None:
     return None
 
 
+def episode_count(media: dict[str, object], airing_status: str | None) -> int | None:
+    """Prefer AniList's finished total. While a show is airing and that total is missing, use episodes aired so far."""
+    total = _as_int(media.get("episodes"))
+    if total is not None:
+        return total
+    if airing_status != "RELEASING":
+        return None
+    upcoming = media.get("nextAiringEpisode")
+    if not isinstance(upcoming, dict):
+        return None
+    next_episode = _as_int(upcoming.get("episode"))
+    if next_episode is None or next_episode <= 1:
+        return None
+    return next_episode - 1
+
+
 def map_media(media: object) -> AnimeData | None:
     if not isinstance(media, dict):
         return None
@@ -159,6 +178,8 @@ def map_media(media: object) -> AnimeData | None:
             if site and url:
                 links.append(ExternalLink(site=site, url=url))
 
+    airing_status = _as_str(media.get("status"))
+
     return AnimeData(
         anilist_id=anilist_id,
         mal_id=_as_int(media.get("idMal")),
@@ -167,8 +188,8 @@ def map_media(media: object) -> AnimeData | None:
         title_synonyms=synonyms,
         cover_url=cover_url,
         format=_as_str(media.get("format")),
-        total_episodes=_as_int(media.get("episodes")),
-        airing_status=_as_str(media.get("status")),
+        total_episodes=episode_count(media, airing_status),
+        airing_status=airing_status,
         season_year=_as_int(media.get("seasonYear")),
         external_links=links,
     )
