@@ -9,8 +9,11 @@ from app.db.session import get_db
 from app.models.anime import Anime
 from app.models.user import User
 from app.schemas.anime import AnimeResponse, AnimeSearchResponse
+from app.schemas.watch_links import WatchLink
 from app.services.anime import get_anime, search_anime
 from app.services.anilist import AniListError, AniListNotFound, AniListRateLimited
+from app.services.progress import MAX_EPISODE_NUMBER
+from app.services.watch_links import list_watch_links
 
 router = APIRouter(prefix="/anime", tags=["anime"])
 
@@ -51,6 +54,19 @@ def search(
             detail="Search query is required",
         )
     return _call(lambda: search_anime(query, page))
+
+
+@router.get(
+    "/{anilist_id}/episodes/{episode_number}/watch-links",
+    response_model=list[WatchLink],
+)
+def read_watch_links(
+    anilist_id: int = Path(ge=1),
+    episode_number: int = Path(ge=1, le=MAX_EPISODE_NUMBER),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[WatchLink]:
+    return list_watch_links(db, current_user, anilist_id, episode_number)
 
 
 @router.get("/{anilist_id}", response_model=AnimeResponse)

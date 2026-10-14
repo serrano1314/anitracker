@@ -11,7 +11,8 @@ export function AppShell() {
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
       <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/95">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-          <NavLink to="/" className="font-semibold">
+          <NavLink to="/" className="font-semibold flex items-center gap-2">
+            <img src="/favicon.svg" alt="" className="h-6 w-6" />
             Anime Tracker
           </NavLink>
           <nav className="flex gap-3 text-sm">
@@ -20,6 +21,9 @@ export function AppShell() {
             </NavLink>
             <NavLink to="/search" className={linkClass}>
               Search
+            </NavLink>
+            <NavLink to="/settings" className={linkClass}>
+              Settings
             </NavLink>
           </nav>
           <div className="ml-auto flex items-center gap-3 text-sm">

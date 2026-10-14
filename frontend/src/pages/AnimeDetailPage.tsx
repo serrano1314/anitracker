@@ -12,8 +12,10 @@ import {
   setEpisodeWatched,
   updateLibrary,
 } from '../api/library'
+import { AnimeSitesSection } from '../components/AnimeSitesSection'
 import { EpisodeGrid } from '../components/EpisodeGrid'
 import { ProgressMeter } from '../components/ProgressMeter'
+import { WatchLinkPanel } from '../components/WatchLinkPanel'
 import { useDialog } from '../components/dialogContext'
 import { airingLabel, displayTitle, formatLabel } from '../lib/display'
 import { episodeCountLabel, knownTotal, parseEpisodeInput } from '../lib/episodes'
@@ -33,6 +35,7 @@ export function AnimeDetailPage() {
   const [markInput, setMarkInput] = useState('')
   const [jumpInput, setJumpInput] = useState('')
   const [focusEpisode, setFocusEpisode] = useState<number | null>(null)
+  const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
 
   const animeQuery = useQuery({
@@ -87,6 +90,7 @@ export function AnimeDetailPage() {
     mutationFn: () => removeFromLibrary(anilistId as number),
     onSuccess: async () => {
       setFocusEpisode(null)
+      setSelectedEpisode(null)
       await refreshProgress()
     },
   })
@@ -136,8 +140,6 @@ export function AnimeDetailPage() {
   const lastEpisode = episodes.reduce((max, episode) => Math.max(max, episode), 0)
   const total = anime.total_episodes
   const maxEpisode = knownTotal(total) ?? 5000
-  const pending =
-    episodeMutation.isPending || markMutation.isPending || addMutation.isPending || removeMutation.isPending
   const actionError = episodeMutation.error ?? markMutation.error ?? addMutation.error ?? updateMutation.error
 
   async function onRemove() {
@@ -356,13 +358,33 @@ export function AnimeDetailPage() {
       {formError ? <p className="text-sm text-red-400">{formError}</p> : null}
       {actionError ? <p className="text-sm text-red-400">{errorText(actionError, 'Could not save')}</p> : null}
 
+      {inLibrary ? <AnimeSitesSection anilistId={anilistId} /> : null}
+
+      {inLibrary && selectedEpisode != null ? (
+        <WatchLinkPanel
+          anilistId={anilistId}
+          episode={selectedEpisode}
+          watched={episodes.includes(selectedEpisode)}
+          pending={episodeMutation.isPending}
+          onClose={() => setSelectedEpisode(null)}
+          onToggleWatched={() =>
+            episodeMutation.mutate({
+              episode: selectedEpisode,
+              watched: !episodes.includes(selectedEpisode),
+            })
+          }
+        />
+      ) : null}
+
       {inLibrary ? (
         <EpisodeGrid
           totalEpisodes={total}
           watchedEpisodes={episodes}
           focusEpisode={focusEpisode}
-          pending={pending}
-          onToggle={(episode, watched) => episodeMutation.mutate({ episode, watched })}
+          onSelect={(episode) => {
+            setSelectedEpisode(episode)
+            setFocusEpisode(episode)
+          }}
         />
       ) : null}
     </article>

@@ -26,3 +26,11 @@ export type AnimeSearchResponse = {
   has_next_page: boolean
   results: Anime[]
 }
+
+export type WatchLinkSource = 'saved' | 'official' | 'search'
+
+export type WatchLink = {
+  label: string
+  url: string
+  source: WatchLinkSource
+}

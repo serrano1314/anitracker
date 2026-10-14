@@ -15,16 +15,14 @@ type EpisodeGridProps = {
   totalEpisodes: number | null
   watchedEpisodes: number[]
   focusEpisode: number | null
-  pending: boolean
-  onToggle: (episode: number, watched: boolean) => void
+  onSelect: (episode: number) => void
 }
 
 export function EpisodeGrid({
   totalEpisodes,
   watchedEpisodes,
   focusEpisode,
-  pending,
-  onToggle,
+  onSelect,
 }: EpisodeGridProps) {
   const highestWatched = watchedEpisodes.reduce((max, episode) => Math.max(max, episode), 0)
   const [openedThrough, setOpenedThrough] = useState(RANGE_SIZE)
@@ -157,14 +155,13 @@ export function EpisodeGrid({
                     <button
                       key={episode}
                       type="button"
-                      disabled={pending}
                       aria-pressed={isWatched}
                       aria-current={focused ? 'true' : undefined}
-                      onClick={() => onToggle(episode, !isWatched)}
+                      onClick={() => onSelect(episode)}
                       className={
                         isWatched
-                          ? 'rounded-md bg-indigo-500 text-sm font-medium tabular-nums hover:bg-indigo-400 disabled:opacity-60'
-                          : 'rounded-md border border-zinc-700 text-sm tabular-nums text-zinc-200 hover:bg-zinc-800 disabled:opacity-60'
+                          ? 'rounded-md bg-indigo-500 text-sm font-medium tabular-nums hover:bg-indigo-400'
+                          : 'rounded-md border border-zinc-700 text-sm tabular-nums text-zinc-200 hover:bg-zinc-800'
                       }
                       style={focused ? { outline: '2px solid #fcd34d', outlineOffset: '1px' } : undefined}
                     >
@@ -177,7 +174,9 @@ export function EpisodeGrid({
           })}
         </div>
       </div>
-      <p className="text-xs text-zinc-500">Filled numbers are watched. Click a number to mark or unmark it.</p>
+      <p className="text-xs text-zinc-500">
+        Filled numbers are watched. Click a number to open watch links.
+      </p>
     </div>
   )
 }

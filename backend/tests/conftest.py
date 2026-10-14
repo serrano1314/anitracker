@@ -20,11 +20,15 @@ from app.main import app
 from app.models.anime import Anime as AnimeModel
 from app.models.library import EpisodeProgress as EpisodeProgressModel
 from app.models.library import UserAnime as UserAnimeModel
+from app.models.sites import UserAnimeSite as UserAnimeSiteModel
+from app.models.sites import UserSite as UserSiteModel
 from app.models.user import User as UserModel
 
 _ = AnimeModel
 _ = EpisodeProgressModel
 _ = UserAnimeModel
+_ = UserAnimeSiteModel
+_ = UserSiteModel
 _ = UserModel
 
 engine = create_engine(
