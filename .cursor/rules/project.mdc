@@ -1,0 +1,17 @@
+---
+description: Anime Tracker project rules for the Cursor agent
+alwaysApply: true
+---
+
+- Stack: FastAPI (Python 3.12), SQLAlchemy 2.0, Alembic, PostgreSQL on Neon, React + TypeScript + Vite, Tailwind, TanStack Query.
+- DATABASE_URL = Neon pooled. DIRECT_URL = Neon direct (Alembic). Never commit .env.
+- Follow docs/PLAN.md. Work on ONE phase at a time. Do not add tables, routes, or UI from a later phase.
+- Ask before changing the schema, API, or locked decisions in section 4.
+- Public anime id is anilist_id. Web JWT and extension tokens stay separate.
+- Backend: routers in app/api, business logic in app/services, no logic inside routers beyond validation.
+- Always use Pydantic schemas for request and response. Use type hints everywhere.
+- Every DB change needs an Alembic migration.
+- Write tests for services (progress rules, title matching, watch links).
+- Frontend: TypeScript strict mode, no `any`, API calls only inside src/api, server data with TanStack Query.
+- Never commit secrets. Use .env and keep .env.example updated.
+- Keep code simple and readable. Small functions, clear names.

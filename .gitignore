@@ -5,6 +5,8 @@
 *.pem
 *.key
 credentials.json
+docs/neon db.txt
+docs/*neon*
 
 # Dependencies and build output
 node_modules/
@@ -16,6 +18,12 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # OS and editor
 .DS_Store
