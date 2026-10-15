@@ -171,7 +171,7 @@ export function Select({
           aria-labelledby={ariaLabel ? undefined : id}
           aria-label={ariaLabel}
           onKeyDown={onListKeyDown}
-          className="ui-select-menu ui-scrollbar absolute z-50 mt-1.5 max-h-60 w-full overflow-y-auto p-1"
+          className="ui-select-menu ui-scrollbar absolute z-[60] mt-1.5 max-h-60 w-full overflow-y-auto p-1"
         >
           {options.map((option) => {
             const selected = option.value === value

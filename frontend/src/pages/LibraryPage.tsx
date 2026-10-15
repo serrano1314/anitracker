@@ -123,14 +123,14 @@ export function LibraryPage() {
           to add it.
         </EmptyState>
       ) : null}
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className="search-results grid gap-4 sm:grid-cols-2">
         {listQuery.data?.results.map((entry) => {
           const title = displayTitle(entry)
           const next = nextEpisodeToMark(entry.last_episode_watched, entry.total_episodes)
           const pending =
             plusOne.isPending && plusOne.variables?.anilistId === entry.anilist_id
           return (
-            <li key={entry.anilist_id} className={cn(UI.card, UI.cardInteractive)}>
+            <li key={entry.anilist_id} className={cn(UI.card, UI.cardInteractive, 'search-results-card')}>
               <Link
                 to={`/anime/${entry.anilist_id}`}
                 state={{ back: backFromLibrary(params) }}

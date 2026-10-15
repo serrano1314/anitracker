@@ -134,7 +134,7 @@ export function AppShell() {
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-zinc-950/85 backdrop-blur-xl pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/85 backdrop-blur-xl pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
         aria-label="Main"
       >
         <div className="mx-auto flex max-w-lg items-stretch gap-1 px-2 pt-2">

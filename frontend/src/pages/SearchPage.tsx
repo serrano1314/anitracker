@@ -94,7 +94,10 @@ export function SearchPage() {
   return (
     <section className={UI.page}>
       <PageHeader title="Search" description="Find shows on AniList and add them to your list." />
-      <form onSubmit={onSubmit} className="ui-card flex flex-col gap-4 sm:flex-row sm:items-end">
+      <form
+        onSubmit={onSubmit}
+        className="ui-card relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end"
+      >
         <label className="block flex-1 space-y-1.5">
           <span className={UI.fieldLabel}>Title</span>
           <input
@@ -104,14 +107,17 @@ export function SearchPage() {
             className={UI.input}
           />
         </label>
-        <label className="block space-y-1.5 sm:w-48">
-          <span className={UI.fieldLabel}>Add as</span>
+        <div className="block space-y-1.5 sm:w-48">
+          <label htmlFor="search-status" className={UI.fieldLabel}>
+            Add as
+          </label>
           <Select
+            id="search-status"
             value={status}
             onChange={(value) => setStatus(value as LibraryStatus)}
             options={libraryStatusSelectOptions()}
           />
-        </label>
+        </div>
         <button type="submit" className={cn(UI.btn, UI.btnPrimary)}>
           Search
         </button>
@@ -133,13 +139,13 @@ export function SearchPage() {
       {searchQuery.data && searchQuery.data.results.length === 0 ? (
         <EmptyState>No matches for “{query}”. Try another title or spelling.</EmptyState>
       ) : null}
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className="search-results grid gap-4 sm:grid-cols-2">
         {searchQuery.data?.results.map((anime) => {
           const title = displayTitle(anime)
           const added = addedIds.includes(anime.anilist_id)
           const pending = addingId === anime.anilist_id
           return (
-            <li key={anime.anilist_id} className={cn(UI.card, UI.cardInteractive)}>
+            <li key={anime.anilist_id} className={cn(UI.card, UI.cardInteractive, 'search-results-card')}>
               <Link
                 to={`/anime/${anime.anilist_id}`}
                 state={{ back: backFromSearch(params) }}

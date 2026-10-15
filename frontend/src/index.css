@@ -213,6 +213,20 @@ body,
   scrollbar-color: rgb(129 140 248 / 0.55) rgb(24 24 27 / 0.35);
 }
 
+html {
+  overflow-x: hidden;
+}
+
+.search-results {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.search-results-card {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 .ui-tablist,
 .ui-select-menu {
   scrollbar-color: rgb(129 140 248 / 0.5) transparent;
