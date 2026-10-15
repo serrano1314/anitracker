@@ -1,96 +1,154 @@
 # Anime Tracker
 
-> Episode progress tracker with AniList integration, Neon PostgreSQL, and multi-site watch links.
-
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-20232A?logo=react)](https://react.dev/)
-[![Neon](https://img.shields.io/badge/Neon-00E699?logo=postgresql)](https://neon.tech/)
-
----
-
-## Screenshots / Design
-
-| Feature | Preview |
-|---|---|
-| Search + Add | Live debounced search with cover, format, episode info |
-| Library | Filter by status; progress tracking per anime |
-| Watch Links | Saved sites first, then streaming suggestions |
-
-*(Add real `.png`/`.jpg` screenshots to `docs/screens/` and replace links below.)*
-
----
+Episode progress tracker. Search comes from AniList. Your list, episode progress, and watch-site links are stored in Neon Postgres. A Chrome extension can save the episode you are watching.
 
 ## Stack
 
-- **Backend:** Python 3.12 + FastAPI + SQLAlchemy + Alembic
-- **DB:** PostgreSQL on [Neon](https://neon.tech) (`DATABASE_URL` / `DIRECT_URL`)
-- **Frontend:** TypeScript + React + Vite + Tailwind + TanStack Query
-- **Auth:** JWT access/refresh tokens
-- **Anime Data:** [AniList GraphQL](https://graphql.anilist.co)
+- Backend: Python 3.12, FastAPI, SQLAlchemy, Alembic
+- Database: Neon Postgres. `DATABASE_URL` is the pooled URL. `DIRECT_URL` is the direct URL used only by Alembic.
+- Frontend: TypeScript, React, Vite, Tailwind, TanStack Query
+- Extension: Chrome Manifest V3, loaded unpacked
 
----
+## Prerequisites
 
-## Quick Setup
+- Git
+- Node.js 20 or newer (`node -v`)
+- Python 3.12 (`python --version`)
+- A [Neon](https://neon.tech) project
+- Google Chrome, if you want to run the extension
+
+No local Postgres install is required.
+
+## 1. Database
+
+In the Neon dashboard, open **Connect** and copy both strings:
+
+- Pooled connection (hostname contains `-pooler`) → `DATABASE_URL`
+- Direct connection (no `-pooler`) → `DIRECT_URL`
+
+Keep `sslmode=require`. Do not commit either URL.
+
+## 2. Backend
+
+From the repo root:
 
 ```bash
-# Backend
 cd backend
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+```
+
+Activate the virtualenv:
+
+```bash
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# macOS / Linux
+source .venv/bin/activate
+```
+
+Then:
+
+```bash
 pip install -r requirements.txt
+```
+
+Create `backend/.env` from the example and fill in the two Neon URLs. Leave the other values unless you need to change them.
+
+```bash
+# Windows
+copy .env.example .env
+
+# macOS / Linux
 cp .env.example .env
-# Add Neon DATABASE_URL + DIRECT_URL
+```
+
+`JWT_SECRET` must be at least 16 characters. For local HTTP, keep `COOKIE_SECURE=false` and `CORS_ORIGINS=http://localhost:5173`.
+
+Apply migrations and start the API:
+
+```bash
 alembic upgrade head
 uvicorn app.main:app --reload
+```
 
-# Frontend
-cd ../frontend
+The API listens on `http://127.0.0.1:8000`. `GET /health` returns `{"status":"ok"}`.
+
+## 3. Frontend
+
+In a second terminal, from the repo root:
+
+```bash
+cd frontend
 npm install
+```
+
+Local dev does not need an API URL. Copy the example and leave `VITE_API_BASE` empty so Vite proxies `/api` to `http://127.0.0.1:8000`.
+
+```bash
+# Windows
+copy .env.example .env
+
+# macOS / Linux
+cp .env.example .env
+```
+
+```bash
 npm run dev
 ```
 
----
+Open `http://localhost:5173`, register, and sign in. Refresh the page. You should stay signed in.
 
-## Neon Setup
+## 4. Extension (optional)
 
-1. Create project at [neon.tech](https://neon.tech) → copy `DATABASE_URL` + `DIRECT_URL`.
-2. Put them in `backend/.env`.
-3. Run `alembic upgrade head`.
-
----
-
-## Env Variables (`backend/.env`)
-
-| Variable | Purpose |
-|---|---|
-| `SECRET_KEY` | JWT signing |
-| `DATABASE_URL` / `DIRECT_URL` | Neon connection |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token lifetime |
-| `REFRESH_TOKEN_EXPIRE_DAYS` | Refresh lifetime |
-
----
-
-## Features
-
-- Search anime via AniList (live debounced input)
-- Library: `watching` / `completed` / `plan_to_watch` / `on_hold` / `dropped`
-- Episode-level progress tracking
-- Save external watch sites per anime
-- Stream links: saved sites → suggestions → search fallback
-
----
-
-## Design Notes
-
-- **Colors:** Deep navy (`#0f172a`) + neon teal (`#00e699`) accents; clean card-based layout.
-- **Typography:** Inter / system sans-serif; large readable episode numbers.
-- **Icons:** `public/icons.svg` for navigation and status badges.
-
----
-
-## API Test
+From the repo root:
 
 ```bash
-curl -X GET 'http://localhost:8000/api/v1/anime/search?q=One+Piece' \
-  -H 'Authorization: Bearer <TOKEN>'
+cd extension
+npm install
+npm run build
 ```
+
+In Chrome, open `chrome://extensions`, turn on **Developer mode**, choose **Load unpacked**, and select `extension/dist`.
+
+In the popup, set **API** to `http://127.0.0.1:8000`. On the website, open **Settings**, create an extension token, paste it into the popup, and click **Save token**.
+
+`npm run build` defaults the API to localhost. `npm run package` is only for the zip published with the live site. It points the popup at the deployed API and writes `frontend/public/anime-tracker-extension.zip`.
+
+## Environment
+
+Backend values live in `backend/.env`. Names match `backend/.env.example`.
+
+| Name | Local use |
+|---|---|
+| `DATABASE_URL` | Neon pooled URL. The API uses this. |
+| `DIRECT_URL` | Neon direct URL. Alembic uses this. |
+| `CORS_ORIGINS` | `http://localhost:5173` |
+| `JWT_SECRET` | Random string, at least 16 characters |
+| `COOKIE_SECURE` | `false` on local HTTP |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token lifetime. Default `15` |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | Refresh cookie lifetime. Default `7` |
+
+Frontend: `VITE_API_BASE` in `frontend/.env`. Leave it empty for `npm run dev`.
+
+Never commit `.env` or real connection strings.
+
+## Tests
+
+```bash
+# backend, with the virtualenv active
+cd backend
+pytest
+
+# frontend
+cd frontend
+npm test
+
+# extension
+cd extension
+npm test
+```
+
+## Production
+
+Host layout and dashboard variables are in `docs/DEPLOY.md`.
