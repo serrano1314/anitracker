@@ -3,7 +3,9 @@ import {
   EPISODE_GRID_GAP,
   EPISODE_ROW_HEIGHT,
   RANGE_SIZE,
+  activeRangeForEpisode,
   columnCount,
+  episodeAnchor,
   episodeRanges,
   rangeStartFor,
   rowCount,
@@ -32,17 +34,18 @@ export function EpisodeGrid({
     setSeenFocus(focusEpisode)
     setSelectedStart(focusEpisode == null ? null : rangeStartFor(focusEpisode))
   }
-  const highestRelevant = Math.max(highestWatched, focusEpisode ?? 0, openedThrough)
+  const anchorEpisode = episodeAnchor(focusEpisode, watchedEpisodes)
+  const highestRelevant = Math.max(highestWatched, anchorEpisode ?? 0, openedThrough)
   const ranges = useMemo(
     () => episodeRanges(totalEpisodes, highestRelevant),
     [highestRelevant, totalEpisodes],
   )
   const totalKnown = totalEpisodes != null && totalEpisodes > 0
 
-  const active =
-    ranges.find((range) => range.start === selectedStart) ??
-    ranges.find((range) => focusEpisode != null && focusEpisode >= range.start && focusEpisode <= range.end) ??
-    ranges[0]
+  const active = useMemo(
+    () => activeRangeForEpisode(ranges, selectedStart, anchorEpisode),
+    [anchorEpisode, ranges, selectedStart],
+  )
 
   const watched = useMemo(() => new Set(watchedEpisodes), [watchedEpisodes])
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -50,9 +53,9 @@ export function EpisodeGrid({
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(320)
   const desiredScroll = active
-    ? scrollOffsetFor(focusEpisode, active.start, active.end, columns)
+    ? scrollOffsetFor(anchorEpisode, active.start, active.end, columns)
     : 0
-  const scrollKey = `${active?.start ?? 0}:${focusEpisode ?? ''}:${columns}`
+  const scrollKey = `${active?.start ?? 0}:${anchorEpisode ?? ''}:${columns}`
   const [appliedScrollKey, setAppliedScrollKey] = useState(scrollKey)
   if (scrollKey !== appliedScrollKey) {
     setAppliedScrollKey(scrollKey)
@@ -150,7 +153,7 @@ export function EpisodeGrid({
               >
                 {rowEpisodes.map((episode) => {
                   const isWatched = watched.has(episode)
-                  const focused = episode === focusEpisode
+                  const focused = episode === anchorEpisode
                   return (
                     <button
                       key={episode}

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  activeRangeForEpisode,
   columnCount,
+  episodeAnchor,
   episodeCountLabel,
   episodeRanges,
   nextEpisodeToMark,
@@ -63,6 +65,31 @@ describe('episode input', () => {
     expect(parseEpisodeInput('1156', 1155)).toBeNull()
     expect(parseEpisodeInput('5001', null)).toBeNull()
     expect(parseEpisodeInput('12abc', 100)).toBeNull()
+  })
+})
+
+describe('episode anchor', () => {
+  it('prefers an explicit focus episode over watched progress', () => {
+    expect(episodeAnchor(50, [1, 2, 811])).toBe(50)
+  })
+
+  it('uses the highest watched episode when there is no focus', () => {
+    expect(episodeAnchor(null, [1, 10, 811])).toBe(811)
+    expect(episodeAnchor(null, [])).toBeNull()
+  })
+})
+
+describe('active range', () => {
+  const ranges = episodeRanges(null, 811)
+
+  it('opens the block that contains the latest watched episode', () => {
+    const active = activeRangeForEpisode(ranges, null, 811)
+    expect(active).toEqual({ start: 801, end: 900 })
+  })
+
+  it('keeps a manually selected range tab', () => {
+    const active = activeRangeForEpisode(ranges, 1, 811)
+    expect(active).toEqual({ start: 1, end: 100 })
   })
 })
 

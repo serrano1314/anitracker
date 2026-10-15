@@ -83,6 +83,43 @@ export function rangeStartFor(episode: number): number {
   return Math.floor((safe - 1) / RANGE_SIZE) * RANGE_SIZE + 1
 }
 
+/** Jump/focus target, or the highest watched episode when opening the grid. */
+export function episodeAnchor(
+  focusEpisode: number | null,
+  watchedEpisodes: readonly number[],
+): number | null {
+  if (focusEpisode != null) {
+    return focusEpisode
+  }
+  const highest = watchedEpisodes.reduce((max, episode) => Math.max(max, episode), 0)
+  return highest > 0 ? highest : null
+}
+
+export function activeRangeForEpisode(
+  ranges: EpisodeRange[],
+  selectedStart: number | null,
+  anchorEpisode: number | null,
+): EpisodeRange | undefined {
+  if (ranges.length === 0) {
+    return undefined
+  }
+  if (selectedStart != null) {
+    const selected = ranges.find((range) => range.start === selectedStart)
+    if (selected) {
+      return selected
+    }
+  }
+  if (anchorEpisode != null) {
+    const match = ranges.find(
+      (range) => anchorEpisode >= range.start && anchorEpisode <= range.end,
+    )
+    if (match) {
+      return match
+    }
+  }
+  return ranges[0]
+}
+
 export function columnCount(
   width: number,
   minCell = 52,
