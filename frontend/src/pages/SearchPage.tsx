@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { searchAnime } from '../api/anime'
 import { ApiError } from '../api/client'
@@ -23,6 +23,16 @@ export function SearchPage() {
   const query = params.get('q')?.trim() ?? ''
   const page = parsePage(params.get('page'))
   const [input, setInput] = useState(query)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const trimmed = input.trim()
+      const updated = new URLSearchParams()
+      if (trimmed) updated.set('q', trimmed)
+      setParams(updated)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [input])
   const [status, setStatus] = useState<LibraryStatus>('watching')
   const [addedIds, setAddedIds] = useState<number[]>([])
 
