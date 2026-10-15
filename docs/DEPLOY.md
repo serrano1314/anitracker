@@ -12,10 +12,11 @@ Create a **Web Service** from this GitHub repo. Runtime: **Python 3**.
 |---|---|
 | Root directory | `backend` |
 | Build command | `pip install -r requirements.txt` |
-| Start command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
-| Release command | `alembic upgrade head` |
+| Start command | `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 
-`backend/.python-version` pins Python 3.12. The release command runs Alembic with `DIRECT_URL` (see `backend/alembic/env.py`).
+`backend/.python-version` pins Python 3.12. Alembic uses `DIRECT_URL` (see `backend/alembic/env.py`).
+
+Render only shows a separate **Pre-Deploy Command** (its name for a release command) on paid instances. On the free plan, leave that unset and keep `alembic upgrade head` in the start command. `upgrade head` is safe to run on every start, including after the free instance wakes up. On a paid instance you can move that command to **Settings → Pre-Deploy Command** and leave the start command as `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 
 Environment variable **names** (values stay in the dashboard):
 
