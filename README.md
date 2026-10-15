@@ -124,10 +124,11 @@ Backend values live in `backend/.env`. Names match `backend/.env.example`.
 | `DATABASE_URL` | Neon pooled URL. The API uses this. |
 | `DIRECT_URL` | Neon direct URL. Alembic uses this. |
 | `CORS_ORIGINS` | `http://localhost:5173` |
-| `JWT_SECRET` | Random string, at least 16 characters |
+| `JWT_SECRET` | Random string, at least 16 characters (not `SECRET_KEY`) |
 | `COOKIE_SECURE` | `false` on local HTTP |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token lifetime. Default `15` |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | Refresh cookie lifetime. Default `7` |
+| `RATE_LIMIT_*` | Optional per-IP limits on auth and extension routes |
 
 Frontend: `VITE_API_BASE` in `frontend/.env`. Leave it empty for `npm run dev`.
 
@@ -149,6 +150,23 @@ cd extension
 npm test
 ```
 
-## Production
+## Production (Render + Vercel)
 
-Host layout and dashboard variables are in `docs/DEPLOY.md`.
+Full dashboard steps and variable lists are in [docs/DEPLOY.md](docs/DEPLOY.md). Summary:
+
+| Part | Host | Notes |
+|---|---|---|
+| Database | Neon | Same `DATABASE_URL` / `DIRECT_URL` pattern as local |
+| API | Render | Root `backend`, start command runs `alembic upgrade head` then `uvicorn` |
+| Web app | Vercel | Root `frontend`, set `VITE_API_BASE` to the Render URL (no trailing slash) |
+| Extension | Your machine | Load unpacked `extension/dist`, API = Render URL, token from live Settings |
+
+Set Render `CORS_ORIGINS` to your exact Vercel origin and `COOKIE_SECURE=true`. Redeploy both sides after changing origins or API URL.
+
+## Rate limiting (manual check)
+
+Auth (`register`, `login`, `refresh`) and extension (`progress`, `match`) are limited per client IP in memory (defaults in `.env.example`). To see a `429` locally, temporarily set `RATE_LIMIT_AUTH_MAX=2` in `backend/.env`, restart uvicorn, and send three quick `POST` requests to `/api/v1/auth/login` (or register). The response body is `{"detail":"Too many requests. Try again in a minute."}`.
+
+## Library backup
+
+In **Settings → Backup**, **Export JSON** downloads your list, episodes, sites, and per-anime links. **Import JSON** merges into the current account (nothing is deleted). Merge rules are documented in `backend/app/schemas/library_backup.py`.

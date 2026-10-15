@@ -3,7 +3,9 @@ import { useState, type FormEvent } from 'react'
 import { ApiError } from '../api/client'
 import { createSite, deleteSite, fetchSites, updateSite } from '../api/sites'
 import { useDialog } from '../components/dialogContext'
+import { LibraryBackupSection } from '../components/LibraryBackupSection'
 import { ExtensionDownloadSection } from '../components/ExtensionDownloadSection'
+import { ErrorPanel, LoadingIndicator } from '../components/PageStatus'
 import { ExtensionTokensSection } from '../components/ExtensionTokensSection'
 import type { SiteInput, WatchSite } from '../types/sites'
 
@@ -182,8 +184,18 @@ export function SettingsPage() {
           ) : null}
         </div>
       </form>
-      {sitesQuery.isPending ? <p className="text-zinc-400">Loading sites…</p> : null}
-      {sitesQuery.data?.length === 0 ? <p className="text-sm text-zinc-400">No watch sites yet.</p> : null}
+      {sitesQuery.isPending ? <LoadingIndicator label="Loading sites…" /> : null}
+      {sitesQuery.isError ? (
+        <ErrorPanel
+          message={errorText(sitesQuery.error, 'Could not load sites')}
+          onRetry={() => {
+            void sitesQuery.refetch()
+          }}
+        />
+      ) : null}
+      {sitesQuery.data?.length === 0 ? (
+        <p className="text-sm text-zinc-400">No watch sites yet. Add one above to use watch links.</p>
+      ) : null}
       {sitesQuery.data?.length ? (
         <ul className="space-y-2">
           {sitesQuery.data.map((site) => (
@@ -222,6 +234,7 @@ export function SettingsPage() {
         </ul>
       ) : null}
       {error ? <p className="text-sm text-red-400">{errorText(error, 'Could not update sites')}</p> : null}
+      <LibraryBackupSection />
       <ExtensionDownloadSection />
       <ExtensionTokensSection />
     </section>

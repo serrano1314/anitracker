@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_refresh_token_subject
+from app.core.rate_limit import enforce_rate_limit
 from app.core.security import (
     clear_refresh_cookie,
     create_access_token,
@@ -26,30 +27,36 @@ def _issue_tokens(response: Response, user: User) -> TokenResponse:
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(
+    request: Request,
     body: RegisterRequest,
     response: Response,
     db: Session = Depends(get_db),
 ) -> TokenResponse:
+    enforce_rate_limit(request, "auth")
     user = register_user(db, body.email, body.username, body.password)
     return _issue_tokens(response, user)
 
 
 @router.post("/login", response_model=TokenResponse)
 def login(
+    request: Request,
     body: LoginRequest,
     response: Response,
     db: Session = Depends(get_db),
 ) -> TokenResponse:
+    enforce_rate_limit(request, "auth")
     user = authenticate_user(db, body.email, body.password)
     return _issue_tokens(response, user)
 
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(
+    request: Request,
     response: Response,
     user_id: UUID = Depends(get_refresh_token_subject),
     db: Session = Depends(get_db),
 ) -> TokenResponse:
+    enforce_rate_limit(request, "auth")
     user = get_user_by_id(db, user_id)
     if user is None:
         clear_refresh_cookie(response)

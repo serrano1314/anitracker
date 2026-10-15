@@ -5,6 +5,7 @@ import type {
   ProgressState,
   WatchedEpisodes,
 } from '../types/library'
+import type { LibraryExportDocument, LibraryImportResponse } from '../types/libraryBackup'
 import { apiFetch, readApiError, readJson } from './client'
 
 export function fetchLibrary(
@@ -65,6 +66,31 @@ export function markUpTo(anilistId: number, episode: number): Promise<ProgressSt
   return apiFetch(`/api/v1/library/${anilistId}/episodes/mark-up-to/${episode}`, {
     method: 'POST',
   }).then((response) => readJson<ProgressState>(response))
+}
+
+export function fetchLibraryExport(): Promise<LibraryExportDocument> {
+  return apiFetch('/api/v1/library/export').then((response) =>
+    readJson<LibraryExportDocument>(response),
+  )
+}
+
+export async function downloadLibraryExport(): Promise<void> {
+  const backup = await fetchLibraryExport()
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const anchor = window.document.createElement('a')
+  const stamp = backup.exported_at.slice(0, 10)
+  anchor.href = url
+  anchor.download = `anime-tracker-backup-${stamp}.json`
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
+
+export function importLibraryBackup(document: unknown): Promise<LibraryImportResponse> {
+  return apiFetch('/api/v1/library/import', {
+    method: 'POST',
+    body: JSON.stringify({ document }),
+  }).then((response) => readJson<LibraryImportResponse>(response))
 }
 
 export async function findLibraryEntry(anilistId: number): Promise<LibraryEntry | null> {

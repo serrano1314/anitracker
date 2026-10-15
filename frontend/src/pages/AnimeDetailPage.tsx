@@ -13,6 +13,7 @@ import {
   updateLibrary,
 } from '../api/library'
 import { AnimeSitesSection } from '../components/AnimeSitesSection'
+import { ErrorPanel, LoadingIndicator } from '../components/PageStatus'
 import { EpisodeGrid } from '../components/EpisodeGrid'
 import { ProgressMeter } from '../components/ProgressMeter'
 import { WatchLinkPanel } from '../components/WatchLinkPanel'
@@ -119,13 +120,18 @@ export function AnimeDetailPage() {
   }
 
   if (animeQuery.isPending) {
-    return <p className="text-zinc-400">Loading…</p>
+    return <LoadingIndicator label="Loading anime…" />
   }
 
   if (animeQuery.isError || !animeQuery.data) {
     return (
       <div className="space-y-3">
-        <p className="text-red-400">{errorText(animeQuery.error, 'Could not load this anime')}</p>
+        <ErrorPanel
+          message={errorText(animeQuery.error, 'Could not load this anime')}
+          onRetry={() => {
+            void animeQuery.refetch()
+          }}
+        />
         <Link to="/search" className="text-sm text-indigo-400 hover:underline">
           Back to search
         </Link>
@@ -224,9 +230,14 @@ export function AnimeDetailPage() {
         </div>
       </div>
 
-      {episodesQuery.isPending ? <p className="text-zinc-400">Loading progress…</p> : null}
+      {episodesQuery.isPending ? <LoadingIndicator label="Loading progress…" /> : null}
       {episodesQuery.isError ? (
-        <p className="text-sm text-red-400">{errorText(episodesQuery.error, 'Could not load progress')}</p>
+        <ErrorPanel
+          message={errorText(episodesQuery.error, 'Could not load progress')}
+          onRetry={() => {
+            void episodesQuery.refetch()
+          }}
+        />
       ) : null}
 
       {!inLibrary && !episodesQuery.isPending ? (

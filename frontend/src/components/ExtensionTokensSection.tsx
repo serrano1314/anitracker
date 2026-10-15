@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { ApiError } from '../api/client'
 import { createExtensionToken, fetchExtensionTokens, revokeExtensionToken } from '../api/extension'
 import type { ExtensionToken } from '../types/extension'
+import { ErrorPanel, LoadingIndicator } from './PageStatus'
 import { useDialog } from './dialogContext'
 
 function errorText(error: unknown, fallback: string): string {
@@ -139,7 +140,15 @@ export function ExtensionTokensSection() {
           {copyNote ? <p className="text-sm text-zinc-300">{copyNote}</p> : null}
         </div>
       ) : null}
-      {tokensQuery.isPending ? <p className="text-zinc-400">Loading tokens…</p> : null}
+      {tokensQuery.isPending ? <LoadingIndicator label="Loading tokens…" /> : null}
+      {tokensQuery.isError ? (
+        <ErrorPanel
+          message={errorText(tokensQuery.error, 'Could not load extension tokens')}
+          onRetry={() => {
+            void tokensQuery.refetch()
+          }}
+        />
+      ) : null}
       {tokensQuery.data?.length === 0 ? <p className="text-sm text-zinc-400">No extension tokens yet.</p> : null}
       {tokensQuery.data?.length ? (
         <ul className="space-y-2">

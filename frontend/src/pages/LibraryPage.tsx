@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { fetchLibrary, setEpisodeWatched } from '../api/library'
+import { EmptyState, ErrorPanel, LoadingIndicator } from '../components/PageStatus'
 import { Pager } from '../components/Pager'
 import { ProgressMeter } from '../components/ProgressMeter'
 import { displayTitle, metaLine } from '../lib/display'
@@ -104,27 +105,24 @@ export function LibraryPage() {
           )
         })}
       </div>
-      {errorMessage ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
-      {listQuery.isPending ? <p className="text-zinc-400">Loading your list…</p> : null}
+      {errorMessage && !listQuery.isError ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
+      {listQuery.isPending ? <LoadingIndicator label="Loading your list…" /> : null}
       {listQuery.isError ? (
-        <button
-          type="button"
-          onClick={() => {
+        <ErrorPanel
+          message={errorMessage ?? 'Could not load your list'}
+          onRetry={() => {
             void listQuery.refetch()
           }}
-          className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800"
-        >
-          Try again
-        </button>
+        />
       ) : null}
       {listQuery.data && listQuery.data.results.length === 0 ? (
-        <p className="text-zinc-400">
+        <EmptyState>
           Nothing here yet.{' '}
           <Link to="/search" className="text-indigo-400 hover:underline">
             Search for an anime
           </Link>{' '}
           to add it.
-        </p>
+        </EmptyState>
       ) : null}
       <ul className="grid gap-3 sm:grid-cols-2">
         {listQuery.data?.results.map((entry) => {

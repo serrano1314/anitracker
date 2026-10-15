@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_extension_user
+from app.core.rate_limit import enforce_rate_limit
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.extension import (
@@ -78,10 +79,12 @@ def destroy_token(
 
 @router.post("/progress", response_model=ExtensionProgressResponse)
 def post_progress(
+    request: Request,
     body: ExtensionProgressRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_extension_user),
 ) -> ExtensionProgressResponse:
+    enforce_rate_limit(request, "extension")
     try:
         return record_extension_progress(
             db,
@@ -97,10 +100,12 @@ def post_progress(
 
 @router.post("/match", response_model=ExtensionMatchResponse)
 def post_match(
+    request: Request,
     body: ExtensionMatchRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_extension_user),
 ) -> ExtensionMatchResponse:
+    enforce_rate_limit(request, "extension")
     try:
         return confirm_extension_match(
             db,

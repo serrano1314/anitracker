@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     ANILIST_SEARCH_CACHE_TTL_SECONDS: int = 300
     ANIME_SYNC_TTL_HOURS: int = 24
 
+    RATE_LIMIT_AUTH_MAX: int = 20
+    RATE_LIMIT_AUTH_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_EXTENSION_MAX: int = 120
+    RATE_LIMIT_EXTENSION_WINDOW_SECONDS: int = 60
+
     @property
     def cors_origin_list(self) -> list[str]:
         origins: list[str] = []

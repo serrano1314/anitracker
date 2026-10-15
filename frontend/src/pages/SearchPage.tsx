@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { searchAnime } from '../api/anime'
 import { ApiError } from '../api/client'
 import { addToLibrary } from '../api/library'
+import { EmptyState, ErrorPanel, LoadingIndicator } from '../components/PageStatus'
 import { Pager } from '../components/Pager'
 import { displayTitle, metaLine } from '../lib/display'
 import { episodeCountLabel } from '../lib/episodes'
@@ -121,27 +122,19 @@ export function SearchPage() {
       {query.length === 0 ? (
         <p className="text-zinc-400">Search AniList by title, then add a show to your list.</p>
       ) : null}
-      {searchQuery.isPending && query.length > 0 ? <p className="text-zinc-400">Searching…</p> : null}
+      {searchQuery.isPending && query.length > 0 ? <LoadingIndicator label="Searching…" /> : null}
       {searchQuery.isError ? (
-        <div className="space-y-2">
-          <p className="text-sm text-red-400">
-            {searchQuery.error instanceof ApiError
-              ? searchQuery.error.message
-              : 'Search failed'}
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              void searchQuery.refetch()
-            }}
-            className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800"
-          >
-            Try again
-          </button>
-        </div>
+        <ErrorPanel
+          message={
+            searchQuery.error instanceof ApiError ? searchQuery.error.message : 'Search failed'
+          }
+          onRetry={() => {
+            void searchQuery.refetch()
+          }}
+        />
       ) : null}
       {searchQuery.data && searchQuery.data.results.length === 0 ? (
-        <p className="text-zinc-400">No matches for “{query}”.</p>
+        <EmptyState>No matches for “{query}”. Try another title or spelling.</EmptyState>
       ) : null}
       <ul className="grid gap-3 sm:grid-cols-2">
         {searchQuery.data?.results.map((anime) => {

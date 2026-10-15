@@ -16,6 +16,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.db.base import Base
 from app.db.session import get_db
+from app.core.rate_limit import reset_rate_limits_for_tests
 from app.main import app
 from app.models.anime import Anime as AnimeModel
 from app.models.extension import ExtensionTitleMap as ExtensionTitleMapModel
@@ -41,6 +42,13 @@ engine = create_engine(
     poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits() -> Generator[None, None, None]:
+    reset_rate_limits_for_tests()
+    yield
+    reset_rate_limits_for_tests()
 
 
 @pytest.fixture

@@ -17,6 +17,12 @@ from app.schemas.library import (
     ProgressStateResponse,
     WatchedEpisodesResponse,
 )
+from app.schemas.library_backup import (
+    LibraryExportDocument,
+    LibraryImportRequest,
+    LibraryImportResponse,
+)
+from app.services.library_backup import export_user_library, import_user_library
 from app.services.anilist import AniListError, AniListNotFound, AniListRateLimited
 from app.services.library import add_to_library, list_library, remove_from_library, update_library
 from app.services.progress import MAX_EPISODE_NUMBER, list_watched_episodes, mark_up_to, set_episode_watched
@@ -64,6 +70,23 @@ def create_library_entry(
     current_user: User = Depends(get_current_user),
 ) -> LibraryEntryResponse:
     return _call(lambda: add_to_library(db, current_user, body.anilist_id, body.status))
+
+
+@router.get("/export", response_model=LibraryExportDocument)
+def export_library(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> LibraryExportDocument:
+    return export_user_library(db, current_user)
+
+
+@router.post("/import", response_model=LibraryImportResponse)
+def import_library(
+    body: LibraryImportRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> LibraryImportResponse:
+    return import_user_library(db, current_user, body.document)
 
 
 @router.get("/{anilist_id}/episodes", response_model=WatchedEpisodesResponse)
