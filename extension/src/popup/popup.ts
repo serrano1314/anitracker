@@ -41,7 +41,20 @@ async function init(): Promise<void> {
 async function saveSettings(): Promise<void> {
   const token = tokenInput?.value.trim() ?? ''
   const apiBase = normalizeApiBase(apiBaseInput?.value ?? '')
+  const origin = pageOrigin(apiBase)
+  if (!origin) {
+    setStatus('API base must be an http or https URL.')
+    return
+  }
+  const granted = await chrome.permissions.request({ origins: [`${origin}/*`] })
+  if (!granted) {
+    setStatus('API permission was not granted.')
+    return
+  }
   await chrome.storage.local.set({ token, apiBase })
+  if (apiBaseInput) {
+    apiBaseInput.value = apiBase
+  }
   setStatus(token ? 'Token saved in this browser.' : 'Token cleared.')
 }
 
