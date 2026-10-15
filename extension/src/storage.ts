@@ -1,7 +1,7 @@
 import type { ProgressEvent, UnmatchedPrompt } from './messages'
 import { isProgressEvent } from './messages'
 
-export const DEFAULT_API_BASE = 'http://127.0.0.1:8000'
+export const DEFAULT_API_BASE = EXTENSION_API_BASE
 
 export type ExtensionState = {
   token: string

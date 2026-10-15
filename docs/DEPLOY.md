@@ -67,6 +67,8 @@ Vite bakes `VITE_API_BASE` in at build time. Change it in Vercel, then redeploy,
 
 ## Extension (unpacked)
 
+The website Settings page links to `frontend/public/anime-tracker-extension.zip`. Rebuild that file from `extension/` with `npm run package` and commit the zip before deploying the frontend. That command bakes `https://anitracker-zvt8.onrender.com` into the popup as the default API. Vercel only publishes the `frontend` directory.
+
 1. From `extension/`, run `npm run build`.
 2. Chrome → `chrome://extensions` → Developer mode → **Load unpacked** → `extension/dist`.
 3. Open the popup. In **API**, enter the Render origin with no trailing slash: `https://your-api.onrender.com`.
