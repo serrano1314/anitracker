@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Anime Tracker",
+  "version": "0.1.0",
+  "description": "Save the episode you are watching to Anime Tracker.",
+  "permissions": ["storage", "activeTab", "scripting", "alarms"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Anime Tracker",
+    "default_popup": "popup.html"
+  }
+}

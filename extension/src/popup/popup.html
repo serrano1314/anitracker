@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anime Tracker</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Anime Tracker</h1>
+      <label>
+        API
+        <input id="api-base" type="url" spellcheck="false" />
+      </label>
+      <label>
+        Extension token
+        <input id="token" type="password" spellcheck="false" autocomplete="off" />
+      </label>
+      <button id="save-settings" type="button">Save token</button>
+      <button id="track-site" type="button">Track this site</button>
+      <p id="status"></p>
+      <section>
+        <h2>This page</h2>
+        <p id="page-summary">Open a video page you allowed, then use the buttons below.</p>
+        <label>
+          Episode
+          <input id="episode" type="number" min="1" step="1" />
+        </label>
+        <div class="row">
+          <button id="mark" type="button">Mark current episode</button>
+          <button id="plus" type="button">+1</button>
+        </div>
+      </section>
+      <section id="match-section" hidden>
+        <h2>Choose the anime</h2>
+        <div id="candidates"></div>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

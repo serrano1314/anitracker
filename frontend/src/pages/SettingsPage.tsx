@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { ApiError } from '../api/client'
 import { createSite, deleteSite, fetchSites, updateSite } from '../api/sites'
 import { useDialog } from '../components/dialogContext'
+import { ExtensionTokensSection } from '../components/ExtensionTokensSection'
 import type { SiteInput, WatchSite } from '../types/sites'
 
 type SiteDraft = {
@@ -220,6 +221,7 @@ export function SettingsPage() {
         </ul>
       ) : null}
       {error ? <p className="text-sm text-red-400">{errorText(error, 'Could not update sites')}</p> : null}
+      <ExtensionTokensSection />
     </section>
   )
 }

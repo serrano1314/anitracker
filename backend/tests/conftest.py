@@ -18,6 +18,8 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.models.anime import Anime as AnimeModel
+from app.models.extension import ExtensionTitleMap as ExtensionTitleMapModel
+from app.models.extension import ExtensionToken as ExtensionTokenModel
 from app.models.library import EpisodeProgress as EpisodeProgressModel
 from app.models.library import UserAnime as UserAnimeModel
 from app.models.sites import UserAnimeSite as UserAnimeSiteModel
@@ -26,6 +28,8 @@ from app.models.user import User as UserModel
 
 _ = AnimeModel
 _ = EpisodeProgressModel
+_ = ExtensionTitleMapModel
+_ = ExtensionTokenModel
 _ = UserAnimeModel
 _ = UserAnimeSiteModel
 _ = UserSiteModel

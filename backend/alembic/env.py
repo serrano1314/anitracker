@@ -7,6 +7,8 @@ from app.core.config import get_settings
 from app.core.db_url import to_sqlalchemy_url
 from app.db.base import Base
 from app.models.anime import Anime as AnimeModel
+from app.models.extension import ExtensionTitleMap as ExtensionTitleMapModel
+from app.models.extension import ExtensionToken as ExtensionTokenModel
 from app.models.library import EpisodeProgress as EpisodeProgressModel
 from app.models.library import UserAnime as UserAnimeModel
 from app.models.sites import UserAnimeSite as UserAnimeSiteModel
@@ -15,6 +17,8 @@ from app.models.user import User as UserModel
 
 _ = AnimeModel
 _ = EpisodeProgressModel
+_ = ExtensionTitleMapModel
+_ = ExtensionTokenModel
 _ = UserAnimeModel
 _ = UserAnimeSiteModel
 _ = UserSiteModel

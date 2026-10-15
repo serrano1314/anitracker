@@ -97,6 +97,7 @@ def test_opening_anime_saves_it_and_second_open_uses_cache(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fake = FakeAniList()
+    fake.data = fake.data.model_copy(update={"airing_status": "FINISHED"})
     monkeypatch.setattr("app.services.anime.get_anilist_client", lambda: fake)
     headers = _auth(client)
     first = client.get("/api/v1/anime/21", headers=headers)
@@ -104,6 +105,7 @@ def test_opening_anime_saves_it_and_second_open_uses_cache(
     body = first.json()
     assert body["anilist_id"] == 21
     assert body["title_romaji"] == "One Piece"
+    assert body["airing_status"] == "FINISHED"
     assert body["last_synced_at"]
     assert "id" not in body
     row = db.scalar(select(Anime).where(Anime.anilist_id == 21))
