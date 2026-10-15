@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { BackLink } from '../components/BackLink'
 import { fetchAnime } from '../api/anime'
 import { ApiError } from '../api/client'
 import {
@@ -20,7 +21,14 @@ import { WatchLinkPanel } from '../components/WatchLinkPanel'
 import { useDialog } from '../components/dialogContext'
 import { airingLabel, displayTitle, formatLabel } from '../lib/display'
 import { episodeCountLabel, knownTotal, parseEpisodeInput } from '../lib/episodes'
-import { STATUS_LABELS, type LibraryStatus } from '../types/library'
+import { INPUT_PLACEHOLDERS } from '../lib/placeholders'
+import { Select } from '../components/Select'
+import { libraryStatusSelectOptions, scoreSelectOptions } from '../lib/selectOptions'
+import { UI, cn } from '../lib/ui'
+import type { BackTarget } from '../lib/navigation'
+
+const DEFAULT_BACK: BackTarget = { label: 'Back to My List', to: '/' }
+import type { LibraryStatus } from '../types/library'
 
 function errorText(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback
@@ -116,25 +124,33 @@ export function AnimeDetailPage() {
   })
 
   if (anilistId == null) {
-    return <p className="text-zinc-300">That anime id is not valid.</p>
+    return (
+      <div className="space-y-3">
+        <BackLink fallback={DEFAULT_BACK} />
+        <p className="text-zinc-300">That anime id is not valid.</p>
+      </div>
+    )
   }
 
   if (animeQuery.isPending) {
-    return <LoadingIndicator label="Loading anime…" />
+    return (
+      <div className="space-y-4">
+        <BackLink fallback={DEFAULT_BACK} />
+        <LoadingIndicator label="Loading anime…" />
+      </div>
+    )
   }
 
   if (animeQuery.isError || !animeQuery.data) {
     return (
       <div className="space-y-3">
+        <BackLink fallback={DEFAULT_BACK} />
         <ErrorPanel
           message={errorText(animeQuery.error, 'Could not load this anime')}
           onRetry={() => {
             void animeQuery.refetch()
           }}
         />
-        <Link to="/search" className="text-sm text-indigo-400 hover:underline">
-          Back to search
-        </Link>
       </div>
     )
   }
@@ -196,19 +212,20 @@ export function AnimeDetailPage() {
 
   return (
     <article className="space-y-6">
+      <BackLink fallback={DEFAULT_BACK} />
       <div className="flex flex-col gap-4 sm:flex-row">
         {anime.cover_url ? (
           <img
             src={anime.cover_url}
             alt=""
-            className="h-56 w-40 rounded-lg object-cover"
+            className="h-56 w-40 rounded-2xl object-cover shadow-lg shadow-black/40 ring-1 ring-white/10"
           />
         ) : (
           <div className="h-56 w-40 rounded-lg bg-zinc-800" />
         )}
         <div className="min-w-0 flex-1 space-y-3">
           <div>
-            <h1 className="text-2xl font-semibold">{title}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
             {anime.title_english && anime.title_romaji !== title ? (
               <p className="text-sm text-zinc-400">{anime.title_romaji}</p>
             ) : null}
@@ -242,30 +259,24 @@ export function AnimeDetailPage() {
 
       {!inLibrary && !episodesQuery.isPending ? (
         <form
-          className="flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4 sm:flex-row sm:items-end"
+          className={cn(UI.card, 'flex flex-col gap-4 sm:flex-row sm:items-end')}
           onSubmit={(event) => {
             event.preventDefault()
             addMutation.mutate()
           }}
         >
-          <label className="block flex-1 space-y-1 text-sm">
-            <span className="text-zinc-300">Add to list</span>
-            <select
+          <label className="block flex-1 space-y-1.5">
+            <span className={UI.fieldLabel}>Add to list</span>
+            <Select
               value={addStatus}
-              onChange={(event) => setAddStatus(event.target.value as LibraryStatus)}
-              className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
-            >
-              {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setAddStatus(value as LibraryStatus)}
+              options={libraryStatusSelectOptions()}
+            />
           </label>
           <button
             type="submit"
             disabled={addMutation.isPending}
-            className="rounded-md bg-indigo-500 px-4 py-2 font-medium hover:bg-indigo-400 disabled:opacity-60"
+            className={cn(UI.btn, UI.btnPrimary)}
           >
             {addMutation.isPending ? 'Adding…' : 'Add to list'}
           </button>
@@ -273,89 +284,71 @@ export function AnimeDetailPage() {
       ) : null}
 
       {inLibrary ? (
-        <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+        <div className={cn(UI.card, 'space-y-5')}>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block space-y-1 text-sm">
-              <span className="text-zinc-300">Status</span>
-              <select
+            <label className="block space-y-1.5">
+              <span className={UI.fieldLabel}>Status</span>
+              <Select
                 value={entryQuery.data?.status ?? 'watching'}
                 disabled={entryQuery.isPending || updateMutation.isPending}
-                onChange={(event) =>
-                  updateMutation.mutate({ status: event.target.value as LibraryStatus })
-                }
-                className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
-              >
-                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => updateMutation.mutate({ status: value as LibraryStatus })}
+                options={libraryStatusSelectOptions()}
+              />
             </label>
-            <label className="block space-y-1 text-sm">
-              <span className="text-zinc-300">Score</span>
-              <select
-                value={entryQuery.data?.score ?? ''}
+            <label className="block space-y-1.5">
+              <span className={UI.fieldLabel}>Score</span>
+              <Select
+                value={entryQuery.data?.score != null ? String(entryQuery.data.score) : ''}
                 disabled={entryQuery.isPending || updateMutation.isPending}
-                onChange={(event) => {
-                  const value = event.target.value
+                onChange={(value) =>
                   updateMutation.mutate({ score: value === '' ? null : Number(value) })
-                }}
-                className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
-              >
-                <option value="">No score</option>
-                {Array.from({ length: 10 }, (_, index) => index + 1).map((score) => (
-                  <option key={score} value={score}>
-                    {score}
-                  </option>
-                ))}
-              </select>
+                }
+                options={scoreSelectOptions()}
+              />
             </label>
           </div>
           <form onSubmit={onMarkUpTo} className="flex flex-col gap-2 sm:flex-row">
-            <label className="block flex-1 space-y-1 text-sm">
-              <span className="text-zinc-300">I watched up to episode</span>
+            <label className="block flex-1 space-y-1.5">
+              <span className={UI.fieldLabel}>I watched up to episode</span>
               <input
                 inputMode="numeric"
                 value={markInput}
                 onChange={(event) => setMarkInput(event.target.value)}
-                placeholder="811"
-                className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
+                placeholder={INPUT_PLACEHOLDERS.episodeNumber}
+                className={UI.input}
               />
             </label>
             <button
               type="submit"
               disabled={markMutation.isPending}
-              className="rounded-md bg-indigo-500 px-4 py-2 font-medium hover:bg-indigo-400 disabled:opacity-60 sm:self-end"
+              className={cn(UI.btn, UI.btnPrimary, 'sm:self-end')}
             >
               {markMutation.isPending ? 'Saving…' : 'Mark up to'}
             </button>
           </form>
           <form onSubmit={onJump} className="flex flex-col gap-2 sm:flex-row">
-            <label className="block flex-1 space-y-1 text-sm">
-              <span className="text-zinc-300">Jump to episode</span>
+            <label className="block flex-1 space-y-1.5">
+              <span className={UI.fieldLabel}>Jump to episode</span>
               <input
                 inputMode="numeric"
                 value={jumpInput}
                 onChange={(event) => setJumpInput(event.target.value)}
-                className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
+                placeholder={INPUT_PLACEHOLDERS.episodeNumber}
+                className={UI.input}
               />
             </label>
-            <button
-              type="submit"
-              className="rounded-md border border-zinc-700 px-4 py-2 hover:bg-zinc-800 sm:self-end"
-            >
+            <button type="submit" className={cn(UI.btn, UI.btnSecondary, 'sm:self-end')}>
               Jump
             </button>
           </form>
-          <div className="border-t border-zinc-800 pt-4">
+          <div className="border-t border-white/10 pt-5">
             <button
               type="button"
               disabled={removeMutation.isPending}
               onClick={() => {
                 void onRemove()
               }}
-              className="inline-flex items-center gap-2 rounded-md border border-red-500/60 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-60"
+              className={cn(UI.btn, UI.btnDangerSoft)}
             >
               <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4 fill-current">
                 <path d="M7.5 2.5h5l.5 1.5H16a1 1 0 1 1 0 2h-.6l-.7 10.1A2 2 0 0 1 12.7 18H7.3a2 2 0 0 1-2-1.9L4.6 6H4a1 1 0 1 1 0-2h3zm-1 3.5.6 9.5h6.8l.6-9.5zM8.5 8a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1zm3 0a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1z" />

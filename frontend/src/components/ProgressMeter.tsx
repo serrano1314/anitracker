@@ -23,7 +23,7 @@ export function ProgressMeter({
         <span className="font-medium tabular-nums">{label}</span>
       </div>
       <div
-        className="h-2 overflow-hidden rounded-full bg-zinc-800"
+        className="h-2 overflow-hidden rounded-full bg-zinc-800/90 ring-1 ring-white/5"
         role="progressbar"
         aria-valuemin={0}
         aria-valuenow={watchedCount}
@@ -31,7 +31,10 @@ export function ProgressMeter({
         aria-label={`Progress ${label}`}
       >
         {ratio != null ? (
-          <div className="h-full rounded-full bg-indigo-500" style={{ width: `${ratio * 100}%` }} />
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+            style={{ width: `${ratio * 100}%` }}
+          />
         ) : null}
       </div>
       {showLast ? (

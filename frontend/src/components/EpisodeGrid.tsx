@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   EPISODE_GRID_GAP,
+  EPISODE_GRID_PADDING,
   EPISODE_ROW_HEIGHT,
   RANGE_SIZE,
   activeRangeForEpisode,
@@ -12,6 +13,7 @@ import {
   scrollOffsetFor,
   visibleRowRange,
 } from '../lib/episodes'
+import { UI, cn } from '../lib/ui'
 
 type EpisodeGridProps = {
   totalEpisodes: number | null
@@ -68,7 +70,7 @@ export function EpisodeGrid({
       return
     }
     const update = () => {
-      const nextColumns = columnCount(node.clientWidth)
+      const nextColumns = columnCount(node.clientWidth - EPISODE_GRID_PADDING * 2)
       const nextHeight = node.clientHeight
       setColumns((current) => (current === nextColumns ? current : nextColumns))
       setViewportHeight((current) => (current === nextHeight ? current : nextHeight))
@@ -97,10 +99,11 @@ export function EpisodeGrid({
   const rows = rowCount(episodes.length, columns)
   const visible = visibleRowRange(scrollTop, viewportHeight, EPISODE_ROW_HEIGHT, rows)
   const buttonHeight = EPISODE_ROW_HEIGHT - EPISODE_GRID_GAP
+  const contentHeight = EPISODE_GRID_PADDING * 2 + rows * EPISODE_ROW_HEIGHT
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Episode ranges">
+    <div className="space-y-4">
+      <div className="ui-tablist" role="tablist" aria-label="Episode ranges">
         {ranges.map((range) => {
           const selected = range.start === active.start
           return (
@@ -110,11 +113,7 @@ export function EpisodeGrid({
               role="tab"
               aria-selected={selected}
               onClick={() => setSelectedStart(range.start)}
-              className={
-                selected
-                  ? 'shrink-0 rounded-full bg-indigo-500 px-3 py-1 text-sm font-medium'
-                  : 'shrink-0 rounded-full border border-zinc-700 px-3 py-1 text-sm text-zinc-300 hover:bg-zinc-800'
-              }
+              className={cn(UI.pill, selected && UI.pillActive)}
             >
               {range.start}–{range.end}
             </button>
@@ -124,7 +123,7 @@ export function EpisodeGrid({
           <button
             type="button"
             onClick={() => setOpenedThrough((current) => Math.max(current, active.end) + RANGE_SIZE)}
-            className="shrink-0 rounded-full border border-dashed border-zinc-600 px-3 py-1 text-sm text-zinc-300 hover:bg-zinc-800"
+            className={cn(UI.pill, 'ui-pill-dashed')}
           >
             Next 100
           </button>
@@ -132,10 +131,10 @@ export function EpisodeGrid({
       </div>
       <div
         ref={scrollRef}
-        className="h-80 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900"
+        className={UI.episodePanel}
         onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
       >
-        <div className="relative" style={{ height: rows * EPISODE_ROW_HEIGHT }}>
+        <div className="relative" style={{ height: contentHeight }}>
           {Array.from({ length: visible.end - visible.start }, (_, offset) => {
             const rowIndex = visible.start + offset
             const rowStart = rowIndex * columns
@@ -143,9 +142,11 @@ export function EpisodeGrid({
             return (
               <div
                 key={rowIndex}
-                className="absolute inset-x-2 grid"
+                className="absolute grid"
                 style={{
-                  top: rowIndex * EPISODE_ROW_HEIGHT,
+                  top: EPISODE_GRID_PADDING + rowIndex * EPISODE_ROW_HEIGHT,
+                  left: EPISODE_GRID_PADDING,
+                  right: EPISODE_GRID_PADDING,
                   height: buttonHeight,
                   gap: EPISODE_GRID_GAP,
                   gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
@@ -161,12 +162,10 @@ export function EpisodeGrid({
                       aria-pressed={isWatched}
                       aria-current={focused ? 'true' : undefined}
                       onClick={() => onSelect(episode)}
-                      className={
-                        isWatched
-                          ? 'rounded-md bg-indigo-500 text-sm font-medium tabular-nums hover:bg-indigo-400'
-                          : 'rounded-md border border-zinc-700 text-sm tabular-nums text-zinc-200 hover:bg-zinc-800'
-                      }
-                      style={focused ? { outline: '2px solid #fcd34d', outlineOffset: '1px' } : undefined}
+                      className={cn(
+                        isWatched ? UI.episodeBtnWatched : UI.episodeBtn,
+                        focused && 'ui-episode-btn-focus',
+                      )}
                     >
                       {episode}
                     </button>

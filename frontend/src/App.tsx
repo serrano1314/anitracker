@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { AppShell } from './components/AppShell'
+import { AuthPageLayout } from './components/AuthPageLayout'
 import { DialogProvider } from './components/DialogProvider'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AnimeDetailPage } from './pages/AnimeDetailPage'
@@ -21,8 +22,10 @@ export default function App() {
         <DialogProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route element={<AuthPageLayout />}>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+              </Route>
               <Route element={<ProtectedRoute />}>
                 <Route element={<AppShell />}>
                   <Route path="/" element={<LibraryPage />} />

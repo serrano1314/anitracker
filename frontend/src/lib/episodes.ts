@@ -1,7 +1,8 @@
 export const RANGE_SIZE = 100
 export const MAX_EPISODE_NUMBER = 5000
-export const EPISODE_ROW_HEIGHT = 48
-export const EPISODE_GRID_GAP = 8
+export const EPISODE_ROW_HEIGHT = 56
+export const EPISODE_GRID_GAP = 10
+export const EPISODE_GRID_PADDING = 12
 
 export type EpisodeRange = {
   start: number
@@ -147,6 +148,7 @@ export function scrollOffsetFor(
   rangeEnd: number,
   columns: number,
   rowHeight = EPISODE_ROW_HEIGHT,
+  padding = EPISODE_GRID_PADDING,
 ): number {
   if (focusEpisode == null || columns < 1 || rowHeight < 1) {
     return 0
@@ -155,7 +157,7 @@ export function scrollOffsetFor(
     return 0
   }
   const row = Math.floor((focusEpisode - rangeStart) / columns)
-  return Math.max(0, row * rowHeight - rowHeight)
+  return Math.max(0, padding + row * rowHeight - rowHeight)
 }
 
 export function visibleRowRange(

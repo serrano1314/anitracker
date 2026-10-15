@@ -4,11 +4,17 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { searchAnime } from '../api/anime'
 import { ApiError } from '../api/client'
 import { addToLibrary } from '../api/library'
+import { PageHeader } from '../components/PageHeader'
 import { EmptyState, ErrorPanel, LoadingIndicator } from '../components/PageStatus'
 import { Pager } from '../components/Pager'
 import { displayTitle, metaLine } from '../lib/display'
 import { episodeCountLabel } from '../lib/episodes'
-import { STATUS_LABELS, type LibraryStatus } from '../types/library'
+import { backFromSearch } from '../lib/navigation'
+import { INPUT_PLACEHOLDERS } from '../lib/placeholders'
+import { Select } from '../components/Select'
+import { libraryStatusSelectOptions } from '../lib/selectOptions'
+import { UI, cn } from '../lib/ui'
+import type { LibraryStatus } from '../types/library'
 
 function parsePage(value: string | null): number {
   const page = Number(value)
@@ -86,41 +92,32 @@ export function SearchPage() {
         : null
 
   return (
-    <section className="space-y-5">
-      <h1 className="text-2xl font-semibold">Search</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row">
-        <label className="block flex-1 space-y-1 text-sm">
-          <span className="text-zinc-300">Title</span>
+    <section className={UI.page}>
+      <PageHeader title="Search" description="Find shows on AniList and add them to your list." />
+      <form onSubmit={onSubmit} className="ui-card flex flex-col gap-4 sm:flex-row sm:items-end">
+        <label className="block flex-1 space-y-1.5">
+          <span className={UI.fieldLabel}>Title</span>
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="One Piece"
-            className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
+            placeholder={INPUT_PLACEHOLDERS.animeTitle}
+            className={UI.input}
           />
         </label>
-        <label className="block space-y-1 text-sm sm:w-48">
-          <span className="text-zinc-300">Add as</span>
-          <select
+        <label className="block space-y-1.5 sm:w-48">
+          <span className={UI.fieldLabel}>Add as</span>
+          <Select
             value={status}
-            onChange={(event) => setStatus(event.target.value as LibraryStatus)}
-            className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
-          >
-            {Object.entries(STATUS_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setStatus(value as LibraryStatus)}
+            options={libraryStatusSelectOptions()}
+          />
         </label>
-        <button
-          type="submit"
-          className="rounded-md bg-indigo-500 px-4 py-2 font-medium hover:bg-indigo-400 sm:self-end"
-        >
+        <button type="submit" className={cn(UI.btn, UI.btnPrimary)}>
           Search
         </button>
       </form>
       {query.length === 0 ? (
-        <p className="text-zinc-400">Search AniList by title, then add a show to your list.</p>
+        <p className={UI.pageLead}>Search AniList by title, then add a show to your list.</p>
       ) : null}
       {searchQuery.isPending && query.length > 0 ? <LoadingIndicator label="Searching…" /> : null}
       {searchQuery.isError ? (
@@ -136,19 +133,23 @@ export function SearchPage() {
       {searchQuery.data && searchQuery.data.results.length === 0 ? (
         <EmptyState>No matches for “{query}”. Try another title or spelling.</EmptyState>
       ) : null}
-      <ul className="grid gap-3 sm:grid-cols-2">
+      <ul className="grid gap-4 sm:grid-cols-2">
         {searchQuery.data?.results.map((anime) => {
           const title = displayTitle(anime)
           const added = addedIds.includes(anime.anilist_id)
           const pending = addingId === anime.anilist_id
           return (
-            <li key={anime.anilist_id} className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-              <Link to={`/anime/${anime.anilist_id}`} className="flex gap-3">
+            <li key={anime.anilist_id} className={cn(UI.card, UI.cardInteractive)}>
+              <Link
+                to={`/anime/${anime.anilist_id}`}
+                state={{ back: backFromSearch(params) }}
+                className="flex gap-3"
+              >
                 {anime.cover_url ? (
                   <img
                     src={anime.cover_url}
                     alt=""
-                    className="h-24 w-16 shrink-0 rounded-md object-cover"
+                    className="h-24 w-16 shrink-0 rounded-lg object-cover ring-1 ring-white/10"
                   />
                 ) : (
                   <div className="h-24 w-16 shrink-0 rounded-md bg-zinc-800" />
@@ -168,6 +169,7 @@ export function SearchPage() {
                 {added ? (
                   <Link
                     to={`/anime/${anime.anilist_id}`}
+                    state={{ back: backFromSearch(params) }}
                     className="inline-block text-sm text-indigo-400 hover:underline"
                   >
                     In your list
@@ -177,7 +179,7 @@ export function SearchPage() {
                     type="button"
                     disabled={pending}
                     onClick={() => addMutation.mutate(anime.anilist_id)}
-                    className="w-full rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-medium hover:bg-indigo-400 disabled:opacity-60"
+                    className={cn(UI.btn, UI.btnPrimary, 'w-full')}
                   >
                     {pending ? 'Adding…' : 'Add to list'}
                   </button>

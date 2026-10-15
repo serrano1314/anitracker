@@ -127,8 +127,8 @@ describe('virtual rows', () => {
   })
 
   it('scrolls a jumped episode into the virtual window', () => {
-    expect(scrollOffsetFor(811, 801, 900, 10)).toBe(0)
-    expect(scrollOffsetFor(850, 801, 900, 10)).toBe(144)
+    expect(scrollOffsetFor(811, 801, 900, 10)).toBe(12)
+    expect(scrollOffsetFor(850, 801, 900, 10)).toBe(180)
     expect(scrollOffsetFor(811, 1, 100, 10)).toBe(0)
     expect(scrollOffsetFor(null, 801, 900, 10)).toBe(0)
   })

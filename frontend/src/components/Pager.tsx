@@ -1,3 +1,5 @@
+import { UI, cn } from '../lib/ui'
+
 type PagerProps = {
   page: number
   hasNext: boolean
@@ -15,7 +17,7 @@ export function Pager({ page, hasNext, onPage }: PagerProps) {
         type="button"
         disabled={page <= 1}
         onClick={() => onPage(page - 1)}
-        className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800 disabled:opacity-40"
+        className={cn(UI.btn, UI.btnSecondary, 'py-2')}
       >
         Previous
       </button>
@@ -24,7 +26,7 @@ export function Pager({ page, hasNext, onPage }: PagerProps) {
         type="button"
         disabled={!hasNext}
         onClick={() => onPage(page + 1)}
-        className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800 disabled:opacity-40"
+        className={cn(UI.btn, UI.btnSecondary, 'py-2')}
       >
         Next
       </button>

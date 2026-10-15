@@ -7,6 +7,9 @@ import { Pager } from '../components/Pager'
 import { ProgressMeter } from '../components/ProgressMeter'
 import { displayTitle, metaLine } from '../lib/display'
 import { nextEpisodeToMark } from '../lib/episodes'
+import { PageHeader } from '../components/PageHeader'
+import { backFromLibrary } from '../lib/navigation'
+import { UI, cn } from '../lib/ui'
 import { STATUS_LABELS, isLibraryStatus, type LibraryStatus } from '../types/library'
 
 const TABS: { id: string; label: string; status?: LibraryStatus }[] = [
@@ -82,9 +85,9 @@ export function LibraryPage() {
             : null
 
   return (
-    <section className="space-y-5">
-      <h1 className="text-2xl font-semibold">My List</h1>
-      <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="List status">
+    <section className={UI.page}>
+      <PageHeader title="My List" description="Track progress and jump back into any show." />
+      <div className="ui-tablist" role="tablist" aria-label="List status">
         {TABS.map((tab) => {
           const selected = activeTab === tab.id
           return (
@@ -94,11 +97,7 @@ export function LibraryPage() {
               role="tab"
               aria-selected={selected}
               onClick={() => setTab(tab.status)}
-              className={
-                selected
-                  ? 'shrink-0 rounded-full bg-indigo-500 px-3 py-1 text-sm font-medium'
-                  : 'shrink-0 rounded-full border border-zinc-700 px-3 py-1 text-sm text-zinc-300 hover:bg-zinc-800'
-              }
+              className={cn(UI.pill, selected && UI.pillActive)}
             >
               {tab.label}
             </button>
@@ -124,20 +123,24 @@ export function LibraryPage() {
           to add it.
         </EmptyState>
       ) : null}
-      <ul className="grid gap-3 sm:grid-cols-2">
+      <ul className="grid gap-4 sm:grid-cols-2">
         {listQuery.data?.results.map((entry) => {
           const title = displayTitle(entry)
           const next = nextEpisodeToMark(entry.last_episode_watched, entry.total_episodes)
           const pending =
             plusOne.isPending && plusOne.variables?.anilistId === entry.anilist_id
           return (
-            <li key={entry.anilist_id} className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-              <Link to={`/anime/${entry.anilist_id}`} className="flex gap-3">
+            <li key={entry.anilist_id} className={cn(UI.card, UI.cardInteractive)}>
+              <Link
+                to={`/anime/${entry.anilist_id}`}
+                state={{ back: backFromLibrary(params) }}
+                className="flex gap-3"
+              >
                 {entry.cover_url ? (
                   <img
                     src={entry.cover_url}
                     alt=""
-                    className="h-24 w-16 shrink-0 rounded-md object-cover"
+                    className="h-24 w-16 shrink-0 rounded-lg object-cover ring-1 ring-white/10"
                   />
                 ) : (
                   <div className="h-24 w-16 shrink-0 rounded-md bg-zinc-800" />
@@ -167,7 +170,7 @@ export function LibraryPage() {
                     plusOne.mutate({ anilistId: entry.anilist_id, episode: next })
                   }
                 }}
-                className="mt-3 w-full rounded-md border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800 disabled:opacity-40"
+                className={cn(UI.btn, UI.btnSecondary, 'mt-4 w-full py-2')}
               >
                 {pending ? 'Saving…' : '+1 episode'}
               </button>

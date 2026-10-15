@@ -1,3 +1,6 @@
+import type { ReactNode } from 'react'
+import { UI, cn } from '../lib/ui'
+
 type LoadingProps = {
   label?: string
 }
@@ -21,13 +24,13 @@ type ErrorPanelProps = {
 
 export function ErrorPanel({ message, onRetry }: ErrorPanelProps) {
   return (
-    <div className="space-y-2 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
-      <p className="text-sm text-red-400">{message}</p>
+    <div className="ui-card space-y-3 border-red-500/30 bg-red-500/5">
+      <p className="text-sm text-red-300">{message}</p>
       {onRetry ? (
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800"
+          className={cn(UI.btn, UI.btnSecondary, 'py-2')}
         >
           Try again
         </button>
@@ -36,12 +39,10 @@ export function ErrorPanel({ message, onRetry }: ErrorPanelProps) {
   )
 }
 
-import type { ReactNode } from 'react'
-
 type EmptyStateProps = {
   children: ReactNode
 }
 
 export function EmptyState({ children }: EmptyStateProps) {
-  return <p className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-sm text-zinc-400">{children}</p>
+  return <p className="ui-card text-sm text-zinc-400">{children}</p>
 }

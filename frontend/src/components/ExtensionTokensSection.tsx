@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../api/client'
+import { INPUT_PLACEHOLDERS } from '../lib/placeholders'
 import { createExtensionToken, fetchExtensionTokens, revokeExtensionToken } from '../api/extension'
 import type { ExtensionToken } from '../types/extension'
 import { ErrorPanel, LoadingIndicator } from './PageStatus'
@@ -106,7 +107,7 @@ export function ExtensionTokensSection() {
             required
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Home Chrome"
+            placeholder={INPUT_PLACEHOLDERS.extensionTokenName}
             className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
           />
         </label>

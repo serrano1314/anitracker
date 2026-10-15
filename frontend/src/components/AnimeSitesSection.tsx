@@ -2,6 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../api/client'
+import { INPUT_PLACEHOLDERS } from '../lib/placeholders'
+import { UI, cn } from '../lib/ui'
+import { Select } from './Select'
 import { addAnimeSite, fetchAnimeSites, fetchSites, removeAnimeSite } from '../api/sites'
 import { useDialog } from './dialogContext'
 
@@ -125,34 +128,28 @@ export function AnimeSitesSection({ anilistId }: AnimeSitesSectionProps) {
       ) : null}
       {available.length > 0 ? (
         <form onSubmit={onAdd} className="grid gap-3 sm:grid-cols-2">
-          <label className="block space-y-1 text-sm">
-            <span className="text-zinc-300">Site</span>
-            <select
+          <label className="block space-y-1.5">
+            <span className={UI.fieldLabel}>Site</span>
+            <Select
               value={siteId}
-              onChange={(event) => setSiteId(event.target.value)}
-              className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
-            >
-              <option value="">Choose a site</option>
-              {available.map((site) => (
-                <option key={site.id} value={site.id}>
-                  {site.name}
-                </option>
-              ))}
-            </select>
+              onChange={setSiteId}
+              placeholder="Choose a site"
+              options={available.map((site) => ({ value: site.id, label: site.name }))}
+            />
           </label>
-          <label className="block space-y-1 text-sm">
-            <span className="text-zinc-300">Page URL for this anime</span>
+          <label className="block space-y-1.5">
+            <span className={UI.fieldLabel}>Page URL for this anime</span>
             <input
               value={animeUrl}
               onChange={(event) => setAnimeUrl(event.target.value)}
-              placeholder="https://watch.example/one-piece"
-              className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
+              placeholder={INPUT_PLACEHOLDERS.animePageUrl}
+              className={UI.input}
             />
           </label>
           <button
             type="submit"
             disabled={!siteId || addMutation.isPending}
-            className="rounded-md bg-indigo-500 px-4 py-2 font-medium hover:bg-indigo-400 disabled:opacity-60 sm:col-span-2 sm:justify-self-start"
+            className={cn(UI.btn, UI.btnPrimary, 'sm:col-span-2 sm:justify-self-start')}
           >
             {addMutation.isPending ? 'Saving…' : 'Add site'}
           </button>

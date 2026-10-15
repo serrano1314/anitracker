@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../api/client'
+import { INPUT_PLACEHOLDERS } from '../lib/placeholders'
 import { createSite, deleteSite, fetchSites, updateSite } from '../api/sites'
 import { useDialog } from '../components/dialogContext'
 import { LibraryBackupSection } from '../components/LibraryBackupSection'
@@ -130,6 +131,7 @@ export function SettingsPage() {
             required
             value={draft.name}
             onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+            placeholder={INPUT_PLACEHOLDERS.siteName}
             className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
           />
         </label>
@@ -140,7 +142,7 @@ export function SettingsPage() {
             type="url"
             value={draft.base_url}
             onChange={(event) => setDraft({ ...draft, base_url: event.target.value })}
-            placeholder="https://example.com"
+            placeholder={INPUT_PLACEHOLDERS.siteBaseUrl}
             className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
           />
         </label>
@@ -149,7 +151,7 @@ export function SettingsPage() {
           <input
             value={draft.episode_url_template}
             onChange={(event) => setDraft({ ...draft, episode_url_template: event.target.value })}
-            placeholder="https://example.com/watch/{slug}-episode-{episode}"
+            placeholder={INPUT_PLACEHOLDERS.episodeUrlTemplate}
             className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
           />
         </label>
@@ -158,7 +160,7 @@ export function SettingsPage() {
           <input
             value={draft.search_url_template}
             onChange={(event) => setDraft({ ...draft, search_url_template: event.target.value })}
-            placeholder="https://example.com/search?q={title}"
+            placeholder={INPUT_PLACEHOLDERS.searchUrlTemplate}
             className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
           />
         </label>

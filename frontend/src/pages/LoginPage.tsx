@@ -2,6 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
+import { AuthField } from '../components/AuthField'
+import { AuthFormShell } from '../components/AuthFormShell'
+import { UI, cn } from '../lib/ui'
 
 export function LoginPage() {
   const { isReady, isAuthenticated, login } = useAuth()
@@ -28,49 +31,44 @@ export function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 text-zinc-50">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6"
-      >
-        <h1 className="text-2xl font-semibold">Log in</h1>
-        <label className="block space-y-1 text-sm">
-          <span className="text-zinc-300">Email</span>
-          <input
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
-          />
-        </label>
-        <label className="block space-y-1 text-sm">
-          <span className="text-zinc-300">Password</span>
-          <input
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2"
-          />
-        </label>
-        {error ? <p className="text-sm text-red-400">{error}</p> : null}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-md bg-indigo-500 px-3 py-2 font-medium hover:bg-indigo-400 disabled:opacity-60"
-        >
-          {submitting ? 'Signing in…' : 'Sign in'}
-        </button>
-        <p className="text-center text-sm text-zinc-400">
+    <AuthFormShell
+      title="Welcome back"
+      description="Sign in to sync your list and watch progress."
+      footer={
+        <>
           No account?{' '}
-          <Link to="/register" className="text-indigo-400 hover:underline">
+          <Link to="/register" className="font-medium text-indigo-300 hover:text-indigo-200 hover:underline">
             Register
           </Link>
-        </p>
+        </>
+      }
+    >
+      <form onSubmit={onSubmit} className="space-y-5">
+        <AuthField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <AuthField
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        {error ? (
+          <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <button type="submit" disabled={submitting} className={cn(UI.btn, UI.btnPrimary, 'w-full py-3')}>
+          {submitting ? 'Signing in…' : 'Sign in'}
+        </button>
       </form>
-    </main>
+    </AuthFormShell>
   )
 }
