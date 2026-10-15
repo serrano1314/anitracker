@@ -7,7 +7,11 @@ import { useDialog } from '../components/dialogContext'
 import { LibraryBackupSection } from '../components/LibraryBackupSection'
 import { ExtensionDownloadSection } from '../components/ExtensionDownloadSection'
 import { ErrorPanel, LoadingIndicator } from '../components/PageStatus'
+import { ChangePasswordSection } from '../components/ChangePasswordSection'
+import { ContactSupportFooterButton } from '../components/ContactSupportSection'
 import { ExtensionTokensSection } from '../components/ExtensionTokensSection'
+import { PageHeader } from '../components/PageHeader'
+import { UI, cn } from '../lib/ui'
 import type { SiteInput, WatchSite } from '../types/sites'
 
 type SiteDraft = {
@@ -114,17 +118,23 @@ export function SettingsPage() {
   const error = sitesQuery.error ?? saveMutation.error ?? deleteMutation.error
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Save the sites you watch on. Episode links can use {'{slug}'}, {'{title}'}, and{' '}
-          {'{episode}'}. {'{slug}'} is the lowercase English title when there is one, otherwise
-          romaji, with only letters and numbers kept and spaces as hyphens.
-        </p>
-      </div>
-      <form onSubmit={onSubmit} className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-        <h2 className="font-medium">{editingId ? 'Edit watch site' : 'Add a watch site'}</h2>
+    <section className={UI.page}>
+      <PageHeader
+        title="Settings"
+        description="Account security, watch sites, backups, and extension tools."
+      />
+      <ChangePasswordSection />
+      <form onSubmit={onSubmit} className={cn(UI.card, 'space-y-4')}>
+        <div>
+          <h2 className="text-lg font-medium tracking-tight text-zinc-50">
+            {editingId ? 'Edit watch site' : 'Add a watch site'}
+          </h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            Episode links can use {'{slug}'}, {'{title}'}, and {'{episode}'}. {'{slug}'} is the
+            lowercase English title when there is one, otherwise romaji, with only letters and numbers
+            kept and spaces as hyphens.
+          </p>
+        </div>
         <label className="block space-y-1 text-sm">
           <span className="text-zinc-300">Name</span>
           <input
@@ -239,6 +249,7 @@ export function SettingsPage() {
       <LibraryBackupSection />
       <ExtensionDownloadSection />
       <ExtensionTokensSection />
+      <ContactSupportFooterButton />
     </section>
   )
 }

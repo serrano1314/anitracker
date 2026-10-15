@@ -17,6 +17,19 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     DIRECT_URL: str
     CORS_ORIGINS: str = "http://localhost:5173"
+    FRONTEND_URL: str = "http://localhost:5173"
+    PASSWORD_RESET_EXPIRE_MINUTES: int = 60
+
+    CONTACT_INBOX_EMAIL: str = ""
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = ""
+    SMTP_USE_TLS: bool = True
+
+    RATE_LIMIT_CONTACT_MAX: int = 5
+    RATE_LIMIT_CONTACT_WINDOW_SECONDS: int = 3600
 
     JWT_SECRET: str = Field(min_length=16)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
@@ -31,6 +44,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_AUTH_WINDOW_SECONDS: int = 60
     RATE_LIMIT_EXTENSION_MAX: int = 120
     RATE_LIMIT_EXTENSION_WINDOW_SECONDS: int = 60
+
+    @property
+    def frontend_url(self) -> str:
+        return self.FRONTEND_URL.strip().rstrip("/") or "http://localhost:5173"
 
     @property
     def cors_origin_list(self) -> list[str]:

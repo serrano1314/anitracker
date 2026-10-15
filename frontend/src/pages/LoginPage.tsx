@@ -4,6 +4,7 @@ import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
 import { AuthField } from '../components/AuthField'
 import { AuthFormShell } from '../components/AuthFormShell'
+import { ForgotPasswordUnavailableTrigger } from '../components/ForgotPasswordUnavailable'
 import { UI, cn } from '../lib/ui'
 
 export function LoginPage() {
@@ -52,14 +53,19 @@ export function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <AuthField
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="space-y-2">
+          <AuthField
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <p className="text-right text-sm">
+            <ForgotPasswordUnavailableTrigger />
+          </p>
+        </div>
         {error ? (
           <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
             {error}

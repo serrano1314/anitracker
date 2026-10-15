@@ -7,8 +7,10 @@ import { DialogProvider } from './components/DialogProvider'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AnimeDetailPage } from './pages/AnimeDetailPage'
 import { LibraryPage } from './pages/LibraryPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SearchPage } from './pages/SearchPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -25,6 +27,8 @@ export default function App() {
               <Route element={<AuthPageLayout />}>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
               </Route>
               <Route element={<ProtectedRoute />}>
                 <Route element={<AppShell />}>

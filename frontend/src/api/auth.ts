@@ -1,4 +1,12 @@
-import type { LoginRequest, RegisterRequest, TokenResponse, User } from '../types/auth'
+import type {
+  ChangePasswordRequest,
+  ForgotPasswordRequest,
+  LoginRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+  TokenResponse,
+  User,
+} from '../types/auth'
 import { apiFetch, readApiError } from './client'
 
 async function parseToken(response: Response): Promise<TokenResponse> {
@@ -43,4 +51,34 @@ export async function fetchMe(): Promise<User> {
     throw await readApiError(response)
   }
   return (await response.json()) as User
+}
+
+export async function changePassword(body: ChangePasswordRequest): Promise<void> {
+  const response = await apiFetch('/api/v1/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  if (!response.ok) {
+    throw await readApiError(response)
+  }
+}
+
+export async function forgotPassword(body: ForgotPasswordRequest): Promise<void> {
+  const response = await apiFetch('/api/v1/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  if (!response.ok) {
+    throw await readApiError(response)
+  }
+}
+
+export async function resetPassword(body: ResetPasswordRequest): Promise<void> {
+  const response = await apiFetch('/api/v1/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  if (!response.ok) {
+    throw await readApiError(response)
+  }
 }

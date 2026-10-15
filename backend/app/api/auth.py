@@ -13,9 +13,17 @@ from app.core.security import (
 )
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse
+from app.schemas.auth import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    ResetPasswordRequest,
+    TokenResponse,
+)
 from app.schemas.user import UserResponse
 from app.services.auth import authenticate_user, get_user_by_id, register_user
+from app.services.password_reset import change_password, request_password_reset, reset_password_with_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -75,3 +83,32 @@ def logout(
 @router.get("/me", response_model=UserResponse)
 def me(current_user: User = Depends(get_current_user)) -> User:
     return current_user
+
+
+@router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+def change_password_route(
+    body: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    change_password(db, current_user, body.current_password, body.new_password)
+
+
+@router.post("/forgot-password", status_code=status.HTTP_204_NO_CONTENT)
+def forgot_password(
+    request: Request,
+    body: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+) -> None:
+    enforce_rate_limit(request, "auth")
+    request_password_reset(db, body.email)
+
+
+@router.post("/reset-password", status_code=status.HTTP_204_NO_CONTENT)
+def reset_password(
+    request: Request,
+    body: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+) -> None:
+    enforce_rate_limit(request, "auth")
+    reset_password_with_token(db, body.token, body.new_password)

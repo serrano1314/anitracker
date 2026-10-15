@@ -26,7 +26,7 @@ def client_ip(request: Request) -> str:
     return "unknown"
 
 
-def enforce_rate_limit(request: Request, scope: str) -> None:
+def enforce_rate_limit(request: Request, scope: str, subject: str | None = None) -> None:
     settings = get_settings()
     if scope == "auth":
         limit = settings.RATE_LIMIT_AUTH_MAX
@@ -34,10 +34,13 @@ def enforce_rate_limit(request: Request, scope: str) -> None:
     elif scope == "extension":
         limit = settings.RATE_LIMIT_EXTENSION_MAX
         window = settings.RATE_LIMIT_EXTENSION_WINDOW_SECONDS
+    elif scope == "contact":
+        limit = settings.RATE_LIMIT_CONTACT_MAX
+        window = settings.RATE_LIMIT_CONTACT_WINDOW_SECONDS
     else:
         raise ValueError(f"unknown rate limit scope: {scope}")
 
-    key = client_ip(request)
+    key = subject if subject is not None else client_ip(request)
     now = time.monotonic()
     bucket = (scope, key)
     with _lock:

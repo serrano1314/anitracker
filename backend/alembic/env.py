@@ -13,6 +13,7 @@ from app.models.library import EpisodeProgress as EpisodeProgressModel
 from app.models.library import UserAnime as UserAnimeModel
 from app.models.sites import UserAnimeSite as UserAnimeSiteModel
 from app.models.sites import UserSite as UserSiteModel
+from app.models.password_reset import PasswordResetToken as PasswordResetTokenModel
 from app.models.user import User as UserModel
 
 _ = AnimeModel
@@ -22,6 +23,7 @@ _ = ExtensionTokenModel
 _ = UserAnimeModel
 _ = UserAnimeSiteModel
 _ = UserSiteModel
+_ = PasswordResetTokenModel
 _ = UserModel
 
 config = context.config
