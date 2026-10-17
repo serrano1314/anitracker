@@ -34,7 +34,7 @@ export function RegisterPage() {
   return (
     <AuthFormShell
       title="Create account"
-      description="Track episodes, scores, and progress in one place."
+      description="Start a calmer way to track every episode, score, and favorite."
       footer={
         <>
           Already registered?{' '}
@@ -49,6 +49,7 @@ export function RegisterPage() {
           label="Email"
           type="email"
           autoComplete="email"
+          placeholder="you@example.com"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -57,6 +58,7 @@ export function RegisterPage() {
           label="Username"
           type="text"
           autoComplete="username"
+          placeholder="Choose a username"
           minLength={3}
           maxLength={32}
           required
@@ -66,7 +68,9 @@ export function RegisterPage() {
         <AuthField
           label="Password"
           type="password"
+          showPasswordToggle
           autoComplete="new-password"
+          placeholder="At least 8 characters"
           minLength={8}
           required
           value={password}
@@ -77,8 +81,9 @@ export function RegisterPage() {
             {error}
           </p>
         ) : null}
-        <button type="submit" disabled={submitting} className={cn(UI.btn, UI.btnPrimary, 'w-full py-3')}>
-          {submitting ? 'Creating account…' : 'Create account'}
+        <button type="submit" disabled={submitting} className={cn(UI.btn, UI.btnPrimary, 'w-full gap-2 py-3')}>
+          {submitting ? 'Creating account…' : 'Create your account'}
+          {!submitting ? <span aria-hidden="true">→</span> : null}
         </button>
       </form>
     </AuthFormShell>

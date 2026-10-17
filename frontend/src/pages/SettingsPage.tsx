@@ -11,7 +11,7 @@ import { ChangePasswordSection } from '../components/ChangePasswordSection'
 import { ContactSupportFooterButton } from '../components/ContactSupportSection'
 import { ExtensionTokensSection } from '../components/ExtensionTokensSection'
 import { PageHeader } from '../components/PageHeader'
-import { UI, cn } from '../lib/ui'
+import { UI } from '../lib/ui'
 import type { SiteInput, WatchSite } from '../types/sites'
 
 type SiteDraft = {
@@ -48,6 +48,40 @@ function toInput(draft: SiteDraft): SiteInput {
 
 function errorText(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback
+}
+
+function SettingsSection({
+  title,
+  description,
+  children,
+  defaultOpen = false,
+}: {
+  title: string
+  description: string
+  children: React.ReactNode
+  defaultOpen?: boolean
+}) {
+  return (
+    <details open={defaultOpen} className="group rounded-2xl border border-white/10 bg-zinc-900/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 marker:content-none [&::-webkit-details-marker]:hidden">
+        <span>
+          <span className="block text-lg font-medium tracking-tight text-zinc-50">{title}</span>
+          <span className="mt-1 block text-sm text-zinc-400">{description}</span>
+        </span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="size-5 shrink-0 text-zinc-400 transition-transform duration-200 group-open:rotate-180"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </summary>
+      <div className="border-t border-white/10 px-5 py-5">{children}</div>
+    </details>
+  )
 }
 
 export function SettingsPage() {
@@ -123,8 +157,18 @@ export function SettingsPage() {
         title="Settings"
         description="Account security, watch sites, backups, and extension tools."
       />
-      <ChangePasswordSection />
-      <form onSubmit={onSubmit} className={cn(UI.card, 'space-y-4')}>
+      <SettingsSection
+        title="Account security"
+        description="Update your password and account access."
+        defaultOpen
+      >
+        <ChangePasswordSection compact />
+      </SettingsSection>
+      <SettingsSection
+        title="Watch sites"
+        description="Add and manage sites used for episode links."
+      >
+      <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <h2 className="text-lg font-medium tracking-tight text-zinc-50">
             {editingId ? 'Edit watch site' : 'Add a watch site'}
@@ -246,9 +290,29 @@ export function SettingsPage() {
         </ul>
       ) : null}
       {error ? <p className="text-sm text-red-400">{errorText(error, 'Could not update sites')}</p> : null}
-      <LibraryBackupSection />
-      <ExtensionDownloadSection />
-      <ExtensionTokensSection />
+      </SettingsSection>
+      <SettingsSection
+        title="Backup"
+        description="Export your library or merge an existing JSON backup."
+      >
+        <LibraryBackupSection compact />
+      </SettingsSection>
+      <SettingsSection
+        title="Browser extension"
+        description="Install the extension and manage its access tokens."
+      >
+        <div className="space-y-8">
+          <ExtensionDownloadSection compact />
+          <div className="border-t border-white/10" />
+          <ExtensionTokensSection compact />
+        </div>
+      </SettingsSection>
+      {/* <SettingsSection
+        title="Support"
+        description="Get help or share feedback with the administrator."
+      >
+        <ContactSupportFooterButton />
+      </SettingsSection> */}
       <ContactSupportFooterButton />
     </section>
   )

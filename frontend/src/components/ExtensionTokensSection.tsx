@@ -22,7 +22,7 @@ function formatWhen(value: string | null): string {
   return `Last used ${date.toLocaleString()}`
 }
 
-export function ExtensionTokensSection() {
+export function ExtensionTokensSection({ compact = false }: { compact?: boolean }) {
   const queryClient = useQueryClient()
   const dialog = useDialog()
   const [name, setName] = useState('')
@@ -93,13 +93,13 @@ export function ExtensionTokensSection() {
 
   return (
     <section className="space-y-4">
-      <div>
+      {!compact ? <div>
         <h2 className="text-xl font-semibold">Extension tokens</h2>
         <p className="mt-1 text-sm text-zinc-400">
           Create a token and paste it into the Chrome extension. The token is shown once. It is
           separate from your login session.
         </p>
-      </div>
+      </div> : null}
       <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4 sm:flex-row sm:items-end">
         <label className="block flex-1 space-y-1 text-sm">
           <span className="text-zinc-300">Token name</span>

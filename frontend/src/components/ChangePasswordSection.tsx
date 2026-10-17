@@ -11,7 +11,7 @@ function errorText(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback
 }
 
-export function ChangePasswordSection() {
+export function ChangePasswordSection({ compact = false }: { compact?: boolean }) {
   const dialog = useDialog()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -49,8 +49,8 @@ export function ChangePasswordSection() {
   const apiError = mutation.error ? errorText(mutation.error, 'Could not change password') : null
 
   return (
-    <section className={cn(UI.card, 'space-y-4')}>
-      <div>
+    <section className={cn(!compact && UI.card, 'space-y-4')}>
+      {!compact ? <div>
         <h2 className="text-lg font-medium tracking-tight text-zinc-50">Account security</h2>
         <p className="mt-1 text-sm text-zinc-400">
           Update your password while signed in.{' '}
@@ -58,7 +58,7 @@ export function ChangePasswordSection() {
             Forgot your password?
           </ForgotPasswordUnavailableTrigger>
         </p>
-      </div>
+      </div> : null}
       <form onSubmit={onSubmit} className="space-y-4">
         <AuthField
           label="Current password"

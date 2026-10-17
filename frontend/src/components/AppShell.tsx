@@ -1,26 +1,26 @@
 import { useState, type ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { PageTransition } from './PageTransition'
 import { ProfileAvatar } from './ProfileAvatar'
 import { ProfileModal } from './ProfileModal'
 import { useAuth } from '../auth/AuthProvider'
+import { useDialog } from './dialogContext'
 
 type NavItem = {
   to: string
   end?: boolean
   label: string
-  shortLabel: string
   icon: (props: { active: boolean }) => ReactNode
 }
 
 function navClass(active: boolean, compact = false): string {
   const base = compact
-    ? 'flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition-all duration-200 ease-out'
-    : 'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 ease-out'
+    ? 'relative z-10 flex flex-1 items-center justify-center rounded-full px-3 py-2.5 transition-colors duration-200 ease-out'
+    : 'relative z-10 inline-flex items-center justify-center rounded-full px-3.5 py-2 transition-colors duration-200 ease-out'
   if (active) {
-    return `${base} bg-indigo-500/20 text-indigo-100 ring-1 ring-indigo-400/30`
+    return `${base} text-indigo-100`
   }
-  return `${base} text-zinc-400 hover:bg-white/5 hover:text-zinc-100`
+  return `${base} text-zinc-400 hover:text-zinc-100`
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -28,7 +28,6 @@ const NAV_ITEMS: NavItem[] = [
     to: '/',
     end: true,
     label: 'My List',
-    shortLabel: 'List',
     icon: ({ active }) => (
       <svg viewBox="0 0 24 24" aria-hidden="true" className={`h-5 w-5 ${active ? 'stroke-indigo-200' : 'stroke-current'}`} fill="none" strokeWidth="1.8">
         <path d="M4 6h16M4 12h16M4 18h10" strokeLinecap="round" />
@@ -38,7 +37,6 @@ const NAV_ITEMS: NavItem[] = [
   {
     to: '/search',
     label: 'Search',
-    shortLabel: 'Search',
     icon: ({ active }) => (
       <svg viewBox="0 0 24 24" aria-hidden="true" className={`h-5 w-5 ${active ? 'stroke-indigo-200' : 'stroke-current'}`} fill="none" strokeWidth="1.8">
         <circle cx="11" cy="11" r="7" />
@@ -49,7 +47,6 @@ const NAV_ITEMS: NavItem[] = [
   {
     to: '/settings',
     label: 'Settings',
-    shortLabel: 'Settings',
     icon: ({ active }) => (
       <svg viewBox="0 0 24 24" aria-hidden="true" className={`h-5 w-5 ${active ? 'stroke-indigo-200' : 'stroke-current'}`} fill="none" strokeWidth="1.8">
         <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
@@ -62,9 +59,56 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
+function NavigationItems({ compact = false }: { compact?: boolean }) {
+  const { pathname } = useLocation()
+  const activeIndex = Math.max(
+    0,
+    NAV_ITEMS.findIndex((item) => (item.end ? pathname === item.to : pathname.startsWith(item.to))),
+  )
+
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full bg-indigo-500/20 ring-1 ring-indigo-400/30 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ transform: `translateX(${activeIndex * 100}%)` }}
+      />
+      {NAV_ITEMS.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          end={item.end}
+          aria-label={item.label}
+          title={item.label}
+          className={({ isActive }) => navClass(isActive, compact)}
+        >
+          {({ isActive }) => (
+            <>
+              {item.icon({ active: isActive })}
+            </>
+          )}
+        </NavLink>
+      ))}
+    </>
+  )
+}
+
 export function AppShell() {
   const { user, logout } = useAuth()
+  const dialog = useDialog()
   const [profileOpen, setProfileOpen] = useState(false)
+
+  async function onLogout() {
+    const confirmed = await dialog.confirm({
+      title: 'Log out?',
+      message: 'You can sign back in at any time to continue tracking your anime.',
+      confirmLabel: 'Log out',
+      tone: 'danger',
+    })
+    if (confirmed) {
+      await logout()
+    }
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
@@ -83,19 +127,10 @@ export function AppShell() {
           </NavLink>
 
           <nav
-            className="mx-auto hidden md:flex items-center rounded-full border border-white/10 bg-zinc-900/50 p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+            className="relative mx-auto hidden w-40 grid-cols-3 items-center rounded-full border border-white/10 bg-zinc-900/50 p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] md:grid"
             aria-label="Main"
           >
-            {NAV_ITEMS.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => navClass(isActive)}>
-                {({ isActive }) => (
-                  <>
-                    {item.icon({ active: isActive })}
-                    {item.label}
-                  </>
-                )}
-              </NavLink>
-            ))}
+            <NavigationItems />
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
@@ -115,11 +150,17 @@ export function AppShell() {
             <button
               type="button"
               onClick={() => {
-                void logout()
+                void onLogout()
               }}
-              className="rounded-full border border-white/10 bg-zinc-900/60 px-3 py-1.5 text-sm text-zinc-300 transition-colors hover:border-white/20 hover:bg-zinc-800 hover:text-zinc-50"
+              className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-zinc-900/60 text-zinc-300/65 transition-colors hover:border-white/20 hover:bg-zinc-800 hover:text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50"
+              aria-label="Log out"
+              title="Log out"
             >
-              Log out
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-5" aria-hidden="true">
+                <path d="M10 17l5-5-5-5" />
+                <path d="M15 12H3" />
+                <path d="M13 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5" />
+              </svg>
             </button>
           </div>
         </div>
@@ -129,25 +170,16 @@ export function AppShell() {
         <ProfileModal open={profileOpen} user={user} onClose={() => setProfileOpen(false)} />
       ) : null}
 
-      <main className="relative mx-auto w-full max-w-5xl px-4 py-8 pb-24 md:pb-10">
+      <main className="relative mx-auto w-full max-w-5xl px-4 py-8 pb-32 md:pb-10">
         <PageTransition />
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-zinc-950/85 backdrop-blur-xl pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
+        className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4 pb-[env(safe-area-inset-bottom)] md:hidden"
         aria-label="Main"
       >
-        <div className="mx-auto flex max-w-lg items-stretch gap-1 px-2 pt-2">
-          {NAV_ITEMS.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => navClass(isActive, true)}>
-              {({ isActive }) => (
-                <>
-                  {item.icon({ active: isActive })}
-                  {item.shortLabel}
-                </>
-              )}
-            </NavLink>
-          ))}
+        <div className="pointer-events-auto relative grid w-full max-w-xs grid-cols-3 items-stretch rounded-full border border-white/15 bg-zinc-900/55 p-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl backdrop-saturate-150">
+          <NavigationItems compact />
         </div>
       </nav>
     </div>

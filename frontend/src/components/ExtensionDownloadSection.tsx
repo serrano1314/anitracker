@@ -8,18 +8,18 @@ function extensionApiBase(): string {
   return 'http://127.0.0.1:8000'
 }
 
-export function ExtensionDownloadSection() {
+export function ExtensionDownloadSection({ compact = false }: { compact?: boolean }) {
   const apiBase = extensionApiBase()
 
   return (
-    <section className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-      <div>
+    <section className={compact ? 'space-y-4' : 'space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-4'}>
+      {!compact ? <div>
         <h2 className="text-xl font-semibold">Chrome extension</h2>
         <p className="mt-1 text-sm text-zinc-400">
           Episode saving from other sites runs in Chrome on your computer. Download the extension
           here, unzip it, and load that folder in Chrome.
         </p>
-      </div>
+      </div> : null}
       <a
         href={EXTENSION_ZIP_PATH}
         download="anime-tracker-extension.zip"

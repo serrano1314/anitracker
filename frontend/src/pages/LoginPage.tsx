@@ -33,8 +33,8 @@ export function LoginPage() {
 
   return (
     <AuthFormShell
-      title="Welcome back"
-      description="Sign in to sync your list and watch progress."
+      title="Login to your account"
+      description="Pick up exactly where you left off—your list and watch progress are waiting."
       footer={
         <>
           No account?{' '}
@@ -49,6 +49,7 @@ export function LoginPage() {
           label="Email"
           type="email"
           autoComplete="email"
+          placeholder="you@example.com"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -57,6 +58,7 @@ export function LoginPage() {
           <AuthField
             label="Password"
             type="password"
+            showPasswordToggle
             autoComplete="current-password"
             required
             value={password}
@@ -71,8 +73,9 @@ export function LoginPage() {
             {error}
           </p>
         ) : null}
-        <button type="submit" disabled={submitting} className={cn(UI.btn, UI.btnPrimary, 'w-full py-3')}>
+        <button type="submit" disabled={submitting} className={cn(UI.btn, UI.btnPrimary, 'w-full gap-2 py-3')}>
           {submitting ? 'Signing in…' : 'Sign in'}
+          {!submitting ? <span aria-hidden="true">→</span> : null}
         </button>
       </form>
     </AuthFormShell>

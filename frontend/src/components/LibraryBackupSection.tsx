@@ -9,7 +9,7 @@ function errorText(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback
 }
 
-export function LibraryBackupSection() {
+export function LibraryBackupSection({ compact = false }: { compact?: boolean }) {
   const queryClient = useQueryClient()
   const dialog = useDialog()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -73,13 +73,13 @@ export function LibraryBackupSection() {
 
   return (
     <section className="space-y-4">
-      <div>
+      {!compact ? <div>
         <h2 className="text-xl font-semibold">Backup</h2>
         <p className="mt-1 text-sm text-zinc-400">
           Export your list, episode progress, watch sites, and per-anime site links as JSON. Import
           merges into this account without deleting data that is not in the file.
         </p>
-      </div>
+      </div> : null}
       <div className="flex flex-col gap-3 sm:flex-row">
         <button
           type="button"

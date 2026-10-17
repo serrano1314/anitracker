@@ -69,12 +69,18 @@ export function Select({
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0)
   }, [open, value, enabledOptions])
 
+  useEffect(() => {
+    if (disabled) {
+      setOpen(false)
+    }
+  }, [disabled])
+
   function selectOption(option: SelectOption) {
     if (option.disabled) {
       return
     }
-    onChange(option.value)
     setOpen(false)
+    onChange(option.value)
   }
 
   function onTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {

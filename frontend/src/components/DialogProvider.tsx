@@ -91,7 +91,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
       {children}
       {dialog ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 backdrop-blur-[2px]"
           onMouseDown={() => finish(dialog.kind !== 'confirm')}
         >
           <div
@@ -99,7 +99,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
             aria-modal="true"
             aria-labelledby={titleId}
             aria-describedby={messageId}
-            className="w-full max-w-md rounded-xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl"
+            className="ui-modal-panel w-full max-w-md p-6"
             onMouseDown={(event) => event.stopPropagation()}
           >
             <div className="flex items-start gap-3">
@@ -113,13 +113,13 @@ export function DialogProvider({ children }: { children: ReactNode }) {
                 </p>
               </div>
             </div>
-            <div className="mt-5 flex justify-end gap-2">
+            <div className="mt-6 flex justify-end gap-2 border-t border-white/10 pt-4">
               {dialog.kind === 'confirm' ? (
                 <button
                   ref={cancelButtonRef}
                   type="button"
                   onClick={() => finish(false)}
-                  className="rounded-md border border-zinc-600 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+                  className="rounded-xl border border-white/10 bg-zinc-900/70 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-zinc-800"
                 >
                   {dialog.cancelLabel}
                 </button>
@@ -130,8 +130,8 @@ export function DialogProvider({ children }: { children: ReactNode }) {
                 onClick={() => finish(true)}
                 className={
                   dialog.tone === 'danger'
-                    ? 'rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-500'
-                    : 'rounded-md bg-indigo-500 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-400'
+                    ? 'rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-500'
+                    : 'rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-400'
                 }
               >
                 {dialog.confirmLabel}
